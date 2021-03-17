@@ -9,7 +9,7 @@ class ServerContext;
 
 #include "AContext.hpp"
 #include "ServerContext.hpp"
-#include "../utils/utils.hpp"
+#include "../sources/utils.hpp"
 #include "Config.hpp"
 
 class LocationContext : public AContext {

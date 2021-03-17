@@ -3,15 +3,13 @@
 //
 
 #include <time.h>
-
 #include <sstream>
 #include <string>
 #include <set>
+#include <dirent.h>
 
 #include "Response.hpp"
-//#include "../../utils/cpp_libft/libft.hpp"
-#include "../../base64_coding/Base64.hpp"
-#include <dirent.h>
+#include "Base64.hpp"
 
 
 extern bool g_sigpipe;
@@ -799,7 +797,7 @@ void Response::generateResponse() {
 	if (_request->isStatusCodeOk()) {
 	    try
         {
-            _request->checkToClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
+            _request->checkClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
             _checkForAcceptPrefixHeaders();
 
             if (_request->isStatusCodeOk()) {

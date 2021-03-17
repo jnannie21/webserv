@@ -1,11 +1,11 @@
 #include <signal.h>
 #include <iostream>
 
-#include "core/Server.hpp"
-#include "core/WebServ.hpp"
+#include "Server.hpp"
+#include "WebServ.hpp"
 
-#include "utils/cpp_libft/libft.hpp"
-#include "base64_coding/Base64.hpp"
+#include "cpp_libft/libft.hpp"
+#include "Base64.hpp"
 
 #define SERVER_SUCCESS_STOP_LOG "\n\n¯\\_(ツ)_/¯ WebServ is stopped ¯\\_(ツ)_/¯\n\n"
 #define CONFIG_FILE_DEFAULT_PATH "./WEBSERV.CONF"

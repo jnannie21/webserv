@@ -6,10 +6,6 @@
 #include <set>
 #include "Request.hpp"
 
-
-#define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
-// TODO:look if we should use it from config ||| !!! Airat comment: subject and checlist not request this. can skip i think
-
 /*
  * return true if METHOD IS NOT ALLOWED BY CONFIG
  * Author: Airat (GDrake)
@@ -124,7 +120,7 @@ const std::set<std::string> Request::implemented_headers = Request::initRequestH
 std::list<int> Request::initOkStatusCodes(void) {
     std::list<int> codes;
 
-    codes.push_back(DEFAULT_REQUEST_STATUS_CODE);
+    codes.push_back(200);
     codes.push_back(204);
     codes.push_back(201);
     codes.push_back(100);
@@ -153,7 +149,7 @@ std::set<std::string> Request::initRequestHeaders() {
 }
 
 Request::Request()
-		: _status_code(DEFAULT_REQUEST_STATUS_CODE),
+		: _status_code(200),
 		_raw_request(""),
 		  _remote_addr(),
 		  _server_port(),
@@ -170,7 +166,7 @@ Request::Request()
 		  _is_lang_file_pos(0) {}
 
 Request::Request(struct sockaddr_in & remote_addr, int server_port)
-		:  _status_code(DEFAULT_REQUEST_STATUS_CODE),
+		:  _status_code(200),
            _raw_request(""),
 		  _remote_addr(remote_addr),
 		  _server_port(server_port),
@@ -598,7 +594,7 @@ bool Request::isStatusCodeOk() {
 	return true;
 }
 
-bool Request::checkToClientMaxBodySize(void) {
+bool Request::checkClientMaxBodySize(void) {
 	long long client_max_body_size;
 	if (_handling_location) {
 		client_max_body_size = _handling_location->getClientMaxBodySizeInfo();
@@ -617,7 +613,7 @@ bool Request::checkToClientMaxBodySize(void) {
 	return true;
 }
 
-bool Request::checkToClientMaxBodySize(long long int value_to_check) {
+bool Request::checkClientMaxBodySize(long long int value_to_check) {
 	long long client_max_body_size;
 	if (_handling_location) {
 		client_max_body_size = _handling_location->getClientMaxBodySizeInfo();
@@ -647,17 +643,17 @@ bool Request::writeBodyReadBytesIntoFile() {
 }
 
 bool Request::checkIsMayFileBeOpenedOrCreated(void) {
-	int flags;
-	if (_is_file_exists) {
-		flags = O_RDWR | O_TRUNC;
-	}
-	else {
-		flags = O_RDWR | O_CREAT;
-	}
+//	int flags;
+//	if (_is_file_exists) {
+//		flags = O_RDWR | O_TRUNC;
+//	}
+//	else {
+//		flags = O_RDWR | O_CREAT;
+//	}
 
-	int file = open(_full_filename.c_str(), flags, 0666);
+	int file = open(_full_filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0666);
 	if (file <= 0) {
-		_status_code = 500;
+		setStatusCode(500);
 		return false;
 	}
 	close(file);

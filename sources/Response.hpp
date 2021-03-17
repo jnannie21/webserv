@@ -7,13 +7,11 @@
 
 class Response;
 
-#include "../Request/Request.hpp"
+#include "Request.hpp"
 #include <sys/socket.h>
 #include <string>
 #include <set>
 #include <list>
-//#include <sys/types.h>
-//#include <sys/wait.h>
 
 
 class Response {
@@ -37,12 +35,10 @@ private:
 	void _generateResponseByStatusCode();
 	void _generateStatusLine();
 	void _generateHeaders();
-//	void _generateContent();
 	void _readFileToContent(std::string & filename);
 	std::string _generateAutoindex(std::string dir_name);
 	void _setContentTypeByFileExt(std::string & ext);
 	bool _isMethodAllowed();
-//	bool _setIndexFileContentToResponseContent(void); // Airat
 	void _updateRequestForErrorPage(const std::string& error_page_link);
 	void _generateDefaultResponseByStatusCode();
 	void _generateResponseForErrorPage(void);
@@ -91,7 +87,6 @@ private:
 	std::string _content;
 	std::string _file_ext;
 	std::string _cgi_response;
-//	std::string _cgi_status_line;
 	std::map<std::string, std::string> _cgi_headers;
 	bool _in_progress;
 	long _remains;

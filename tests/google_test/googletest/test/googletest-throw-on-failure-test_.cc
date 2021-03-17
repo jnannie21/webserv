@@ -41,7 +41,7 @@
 #include <exception>                    // for set_terminate
 
 // This terminate handler aborts the program using exit() rather than abort().
-// This avoids showing pop-ups on Windows systems and core dumps on Unix-like
+// This avoids showing pop-ups on Windows systems and sources dumps on Unix-like
 // ones.
 void TerminateHandler() {
   fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");

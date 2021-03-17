@@ -4,10 +4,10 @@
 
 #include "Listener.hpp"
 #include "WebServ.hpp"
-#include "Response/Response.hpp"
-#include "../base64_coding/Base64.hpp"
+#include "Response.hpp"
+#include "Base64.hpp"
 
-#define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers TODO:look if we should use it from config
+#define TIME_OUT 300000
 
 Listener::~Listener(void) {
     std::list<int>::iterator read = _clients_read.begin();
@@ -190,7 +190,7 @@ bool Listener::continueReadBody(Request* request_obj) {
     else if ((request_obj->_headers.count("content-length"))) {
 		length = libft::strtoul_base(request_obj->_headers["content-length"], 10);
 
-		bool size_check = request_obj->checkToClientMaxBodySize(length); // 413 set inside if needed
+		bool size_check = request_obj->checkClientMaxBodySize(length); // 413 set inside if needed
         if (!size_check) {
             return true; // finished beacuse of SIZE
         }
@@ -278,7 +278,7 @@ bool Listener::processHeaderInfoForActions(int client_socket) {
     if (request->_handling_location) {
 		if (request->_handling_location->getAuthEnable()) { // TODO: add to config file
 			if (request->_headers.count("authorization")) {
-				std::vector<std::string> log_pass = parser_log_pass(std::string("base64_coding/passwd"), request);
+				std::vector<std::string> log_pass = parser_log_pass(std::string("passwd"), request);
 				std::string auth_scheme = request->_headers["authorization"].substr(0, 5);
 				libft::string_to_lower(auth_scheme);
 				std::string credentials = request->_headers["authorization"].substr(6);
@@ -300,7 +300,7 @@ bool Listener::processHeaderInfoForActions(int client_socket) {
     }
 //    std::cout << request->getAbsoluteRootPathForRequest() << std::endl;
 
-    request->checkToClientMaxBodySize();
+    request->checkClientMaxBodySize();
     if (!request->isStatusCodeOk()) {
         return false;
     }
@@ -348,7 +348,7 @@ void Listener::handleRequests(fd_set* globalReadSetPtr) {
                     request->setHostAndPort(_host, _port);
                     bool header_was_read_client = request->isHeaderWasRead();
 
-                    request->_bytes_read = recv(fd, request->_buf, BUFFER_LENGHT - 1, 0);
+                    request->_bytes_read = recv(fd, request->_buf, BUFFER_SIZE - 1, 0);
 
                     if (request->_bytes_read <= 0) { // Соединение разорвано, удаляем сокет из множества //
 						readError(it); // ERASES iterator instance inside

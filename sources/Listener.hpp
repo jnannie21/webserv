@@ -9,8 +9,8 @@ class Listener;
 #include <string>
 #include <list>
 #include <sys/socket.h>
-#include "Request//Request.hpp"
-#include "Response/Response.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 
 class Listener {
 public:

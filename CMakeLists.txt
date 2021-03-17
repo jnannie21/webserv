@@ -3,30 +3,30 @@ project(webserv)
 
 set(CMAKE_CXX_STANDARD 98)
 
-set(UTILS_SRCS utils/utils.cpp utils/utils.hpp
-        utils/get_next_line/get_next_line.cpp utils/get_next_line/get_next_line_utils.cpp
-        utils/cpp_libft/stl_containers_operator_overloading.cpp
-        utils/cpp_libft/get_next_word.cpp
-        utils/cpp_libft/libft.hpp utils/cpp_libft/isspace.cpp
-        utils/cpp_libft/unsigned_number_len.cpp utils/cpp_libft/atoi.cpp
-        utils/custom_structures/Pair.hpp
-        utils/cpp_libft/is_correct_ip_octet.cpp
-        utils/cpp_libft/tolower.cpp
-        utils/cpp_libft/isdigit.cpp
-        utils/cpp_libft/strtoul_base.cpp
-        utils/cpp_libft/string_to_lower.cpp
-        utils/cpp_libft/ultostr_base.cpp
-        utils/cpp_libft/stoll_base.cpp
-        utils/cpp_libft/percent_decode.cpp
-        utils/cpp_libft/toupper.cpp
-        utils/cpp_libft/string_to_upper.cpp
+set(UTILS_SRCS sources/utils.cpp sources/utils.hpp
+        sources/get_next_line/get_next_line.cpp sources/get_next_line/get_next_line_utils.cpp
+        sources/cpp_libft/stl_containers_operator_overloading.cpp
+        sources/cpp_libft/get_next_word.cpp
+        sources/cpp_libft/libft.hpp sources/cpp_libft/isspace.cpp
+        sources/cpp_libft/unsigned_number_len.cpp sources/cpp_libft/atoi.cpp
+        sources/Pair.hpp
+        sources/cpp_libft/is_correct_ip_octet.cpp
+        sources/cpp_libft/tolower.cpp
+        sources/cpp_libft/isdigit.cpp
+        sources/cpp_libft/strtoul_base.cpp
+        sources/cpp_libft/string_to_lower.cpp
+        sources/cpp_libft/ultostr_base.cpp
+        sources/cpp_libft/stoll_base.cpp
+        sources/cpp_libft/percent_decode.cpp
+        sources/cpp_libft/toupper.cpp
+        sources/cpp_libft/string_to_upper.cpp
         )
 
 
 set(CONFIG_PARSING_SRCS ${UTILS_SRCS} config_parsing/Config.cpp
         config_parsing/AContext.hpp config_parsing/ServerContext.cpp config_parsing/LocationContext.cpp)
 
-set(CORE_PATH "core/")
+set(CORE_PATH "sources/")
 
 
 set (PROJECT_SRCS  ${CORE_PATH}Server.cpp
@@ -35,10 +35,10 @@ set (PROJECT_SRCS  ${CORE_PATH}Server.cpp
         ${CORE_PATH}Listener.cpp
         ${CORE_PATH}Request/Request.cpp
         ${CORE_PATH}Response/Response.cpp
-        base64_coding/Base64.cpp
+        sources/Base64.cpp
         ${CONFIG_PARSING_SRCS})
 
-add_executable(webserv main.cpp ${PROJECT_SRCS} )
+add_executable(webserv sources/main.cpp ${PROJECT_SRCS} )
 
 
 ################################

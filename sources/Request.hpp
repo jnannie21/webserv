@@ -5,17 +5,14 @@ class Request;
 #include <map>
 #include <set>
 #include <string>
-#include <climits>
 
-#include "../WebServ.hpp"
-#include "../Response/Response.hpp"
-#include "../../config_parsing/Config.hpp"
+#include "WebServ.hpp"
+#include "Response.hpp"
+#include "../config_parsing/Config.hpp"
 
 #define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
-#define DEFAULT_REQUEST_STATUS_CODE 200
 
-#define BUFFER_LENGHT 1024
-#define TIME_OUT 300000
+#define BUFFER_SIZE 1024
 
 
 class Request {
@@ -47,7 +44,7 @@ private:
 	LocationContext*                    _handling_location;
 	std::string                         _absolute_root_path_for_request;
 	bool                                _is_alias_path;
-	char                                _buf[BUFFER_LENGHT];
+	char                                _buf[BUFFER_SIZE];
 	long                                 _bytes_read;
 	std::string                         _full_filename;
 
@@ -101,8 +98,8 @@ public:
 	void increaseOnlyContentLengthReadBodySize(long bytes_read);
 	bool isHeaderWasRead(void) const;
 	bool isStatusCodeOk();
-	bool checkToClientMaxBodySize(void);
-	bool checkToClientMaxBodySize(long long int value_to_check);
+	bool checkClientMaxBodySize(void);
+	bool checkClientMaxBodySize(long long int value_to_check);
 	bool writeBodyReadBytesIntoFile();
 	bool checkIsMayFileBeOpenedOrCreated(void);
 	bool isFileExists(void);
