@@ -101,7 +101,7 @@ public:
 	bool checkClientMaxBodySize(void);
 	bool checkClientMaxBodySize(long long int value_to_check);
 	bool writeBodyReadBytesIntoFile();
-	bool checkIsMayFileBeOpenedOrCreated(void);
+	void checkFile(std::string & filename);
 	bool isFileExists(void);
 	bool isFileExists(const std::string& full_filename);
 	bool isRegFileExists(const std::string& full_filename);
@@ -109,6 +109,7 @@ public:
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);
 	bool isMethodLimited(const LocationContext& handling_location);
+	std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(std::string value);
 };
 
 

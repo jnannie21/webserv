@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <iostream>
 
 bool utils::isHttpMethod(const std::string& value) {
     std::string HTTP_METHODS[8] = {"GET",

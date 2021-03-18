@@ -6,6 +6,7 @@
 #include "WebServ.hpp"
 #include "Response.hpp"
 #include "Base64.hpp"
+#include <sys/time.h>
 
 #define TIME_OUT 300000
 
@@ -250,18 +251,9 @@ bool Listener::processHeaderInfoForActions(int client_socket) {
 
 //    std::cout << request->getRawRequest() << std::endl;
 
-    // we dont need silently change raw request inside parsing methods!
     request->parseRequestLine();
-    if (request->isStatusCodeOk()) {
-        request->parseHeaders();
-		if (request->isStatusCodeOk())
-			request->parsURL();
-		else
-			return false;
-    }
-    else {
-        return false;
-    }
+    request->parseHeaders();
+    request->parsURL();
 
     WebServ::routeRequest(_host, _port, request, request->_request_target);
 
@@ -269,10 +261,6 @@ bool Listener::processHeaderInfoForActions(int client_socket) {
     if ((lang_start_pos = request->_request_target.find("_lang_")) != std::string::npos) {
         lang_start_pos += 6; // pass "_lang_"
         request->_is_lang_file_pos = lang_start_pos;
-    }
-
-    if (!request->isStatusCodeOk()) {
-        return false;
     }
 
     if (request->_handling_location) {
@@ -328,8 +316,7 @@ bool Listener::processHeaderInfoForActions(int client_socket) {
                 return false;
             }
         }
-        if (!request->checkIsMayFileBeOpenedOrCreated())
-            return false;
+        request->checkFile(request->_full_filename);
     }
     return true;
 }

@@ -2,7 +2,7 @@
 // Created by jnannie on 2/13/21.
 //
 
-#include <time.h>
+//#include <time.h>
 #include <sstream>
 #include <string>
 #include <set>
@@ -10,6 +10,7 @@
 
 #include "Response.hpp"
 #include "Base64.hpp"
+#include <sys/time.h>
 
 
 extern bool g_sigpipe;
@@ -170,7 +171,7 @@ std::string Response::_getLocationHeader(bool is_file) {
 	location += "location: ";
 	location += "http://";
 	location += _request->_headers["host"];
-	location += _request->_request_target;//getLocationHeader();
+	location += _request->_request_target;
 	if (!is_file) {
         location += '/';
 	}
@@ -1024,12 +1025,13 @@ std::list<std::map<std::string, std::list<std::string> > > Response::_dir_opers(
 
 
 		// get modify time info
-		long corrected_to_GMT = info_buf.st_mtime + WebServ::getCorrectionMinutesToGMT()*60;
-		std::string modified_seconds_to_str = libft::ultostr_base(corrected_to_GMT, 10);
+//		long corrected_to_GMT = info_buf.st_mtime + WebServ::getCorrectionMinutesToGMT()*60;
+//		std::string modified_seconds_to_str = libft::ultostr_base(corrected_to_GMT, 10);
+		std::string modified_seconds_to_str = libft::ultostr_base(info_buf.st_mtime, 10);
 		struct tm modified_time;
 		char *null_if_error = strptime(modified_seconds_to_str.c_str(), "%s", &modified_time);
 		if (!null_if_error)
-			throw std::exception();
+			_request->setStatusCode(500);
 		char time_to_str[18]; // example: 31-Jan-2021 20:51
 		strftime(time_to_str, 18, "%d-%b-%Y %H:%M", &modified_time);
 

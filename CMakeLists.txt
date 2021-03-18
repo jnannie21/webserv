@@ -26,15 +26,15 @@ set(UTILS_SRCS sources/utils.cpp sources/utils.hpp
 set(CONFIG_PARSING_SRCS ${UTILS_SRCS} config_parsing/Config.cpp
         config_parsing/AContext.hpp config_parsing/ServerContext.cpp config_parsing/LocationContext.cpp)
 
-set(CORE_PATH "sources/")
+set(SOURCE_PATH "sources/")
 
 
-set (PROJECT_SRCS  ${CORE_PATH}Server.cpp
-        ${CORE_PATH}WebServ.cpp
-        ${CORE_PATH}WebServ_Router.cpp
-        ${CORE_PATH}Listener.cpp
-        ${CORE_PATH}Request/Request.cpp
-        ${CORE_PATH}Response/Response.cpp
+set (PROJECT_SRCS  ${SOURCE_PATH}Server.cpp
+        ${SOURCE_PATH}WebServ.cpp
+        ${SOURCE_PATH}WebServ_Router.cpp
+        ${SOURCE_PATH}Listener.cpp
+        ${SOURCE_PATH}Request.cpp
+        ${SOURCE_PATH}Response.cpp
         sources/Base64.cpp
         ${CONFIG_PARSING_SRCS})
 

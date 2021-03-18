@@ -398,8 +398,7 @@ void    Request::parsURL() {
 	}
 }
 
-std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(const std::string& header_name, std::string value) {
-    (void)header_name;
+std::list<std::string> Request::parseAndSortAcceptPrefixHeadersByQuality(std::string value) {
 
     std::list<Pair<std::string, float> > with_quality;
     std::size_t pos;
@@ -476,8 +475,7 @@ void Request::handleExpectHeader(void) {
  */
 
 void Request::handleAcceptCharsetHeader(void) {
-    std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language",
-                                                                             _headers["accept-charset"]);
+    std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
 
     bool is_found = (std::find(values.begin(), values.end(), DEFAULT_RESPONSE_CHARSET) != values.end());
     if (!is_found) {
@@ -492,8 +490,7 @@ void Request::handleAcceptLanguageHeader(bool is_header_exists) {
     if (_is_lang_file_pos) {
         if (is_header_exists)
         {
-            std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language",
-                                                                                     _headers["accept-language"]);
+            std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
             std::list<std::string>::const_iterator it = values.begin();
 
             bool is_found = false;
@@ -642,22 +639,10 @@ bool Request::writeBodyReadBytesIntoFile() {
 	return true;
 }
 
-bool Request::checkIsMayFileBeOpenedOrCreated(void) {
-//	int flags;
-//	if (_is_file_exists) {
-//		flags = O_RDWR | O_TRUNC;
-//	}
-//	else {
-//		flags = O_RDWR | O_CREAT;
-//	}
-
-	int file = open(_full_filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0666);
-	if (file <= 0) {
+void Request::checkFile(std::string & filename) {
+	struct stat buffer;
+	if (stat (filename.c_str(), &buffer) < 0)
 		setStatusCode(500);
-		return false;
-	}
-	close(file);
-	return true;
 }
 
 bool Request::isFileExists(void) {
