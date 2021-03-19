@@ -5,13 +5,6 @@
 #ifndef WEBSERV_UTILS_H
 #define WEBSERV_UTILS_H
 
-//#include <iostream>
-//#include <cerrno> //errno
-//#include <cstring> //for strerror
-//#include <cstdlib>
-//#include <list>
-//#include <map>
-//#include <sys/time.h>
 #include <string>
 
 

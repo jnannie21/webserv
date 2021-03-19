@@ -145,12 +145,7 @@ public:
 
     };
 
-    static void _badConfigError(const std::string & error_text) {
-        std::cerr << error_text << std::endl;
-        throw Config::BadConfigException();
-    }
-
-
+    static void _badConfigError(const std::string & error);
 
 private:
     const std::string& _getConfigText(void) const;
@@ -203,28 +198,18 @@ private:
     const std::string _checkForChangeErrorCodeParam(const std::list<std::string>& directive_params) const;
     int _checkErrorCodeThatShouldBeChanged(const std::string& error_code_str) const;
 
-
-
+private:
+	std::list<ServerContext*> _servers;
 
     std::string _config_text;
     int _len;
-
-
     bool _is_eof_reached;
     int _tmp_len;
-
     std::list<std::string> _serverContext;
     std::list<std::string> _locationContext;
     std::list<std::string>::const_iterator _ite_server;
     std::list<std::string>::const_iterator _ite_location;
-
     std::map<std::string, bool> _isMultipleParamDirective;
-
-
-    std::list<ServerContext*> _servers;
-
-
-
 };
 
 #endif //WEBSERV_CONFIG_HPP

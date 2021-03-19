@@ -3,6 +3,12 @@
 //
 
 #include "ServerContext.hpp"
+#include <list>
+
+ServerContext::ServerContext() : is_server_names_were_updated(false) {
+	_server_names.push_back("");
+
+};
 
 ServerContext::~ServerContext()
 {
@@ -61,11 +67,10 @@ void ServerContext::structure_properties(void) {
 }
 
 
-
-
 const std::map<std::string, std::list<int> >&  ServerContext::getHostsAndPorts(void) const {
     return _hosts_ports;
 }
+
 
 const std::list<std::string>& ServerContext::getServerNames(void) const {
     return _server_names;
@@ -121,13 +126,30 @@ LocationContext* ServerContext::addLocation(const std::list<std::string>& locati
 
 
 void ServerContext::addHostPort(const std::string& host, int port) {
-    if (_hosts_ports.find(host) == _hosts_ports.end()) {
-        std::list<int> tmp_list;
-        tmp_list.push_back(port);
-        _hosts_ports[host] = tmp_list;
-    } else {
+//    if (_hosts_ports.find(host) == _hosts_ports.end()) {
+//        std::list<int> tmp_list;
+//        tmp_list.push_back(port);
+//        _hosts_ports[host] = tmp_list;
+//    } else {
         _hosts_ports[host].push_back(port);
-    }
+//        std::cout << host << std::endl;
+//        std::cout << _hosts_ports[host].front() << std::endl;
+//        return;
+
+//	std::map<std::string, std::list<int> >::const_iterator map_it = _hosts_ports.begin();
+//	std::map<std::string, std::list<int> >::const_iterator map_ite = _hosts_ports.end();
+
+//	while (map_it != map_ite) {
+//		std::cout << (*map_it).first << std::endl;
+//        std::cout << (*map_it).second.front() << std::endl;
+//        ++map_it;
+//	}
+
+//        _hosts_ports[host].push_back(123);
+//        std::cout << host << std::endl;
+//        std::cout << _hosts_ports[host] << std::endl;
+//        return;
+//    }
 }
 
 void ServerContext::addServerNames(std::list<std::string>& server_names) {

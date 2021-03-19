@@ -9,7 +9,6 @@ Config::Config(const std::string &path_to_config) {
     fillConfigTextFromFile(path_to_config);
     _len = _config_text.size();
     splitConfigTextIntoBlocks();
-
 }
 
 Config::~Config(void)
@@ -21,6 +20,10 @@ Config::~Config(void)
     }
 }
 
+void Config::_badConfigError(const std::string & error) {
+	std::cerr << error << std::endl;
+	throw Config::BadConfigException();
+}
 
 const std::string& Config::_getConfigText(void) const {
     return _config_text;
@@ -381,8 +384,6 @@ std::list<std::string> Config::parseSingleParamDirective(const std::string &keyw
     _tmp_len++;
     return params;
 }
-
-
 
 void Config::_checkAndSetParams(ServerContext* current_server, AContext* current_context, const std::string& directive_keyword,
                         const std::list<std::string>& directive_params) {

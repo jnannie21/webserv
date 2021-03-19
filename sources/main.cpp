@@ -7,11 +7,8 @@
 #include "cpp_libft/libft.hpp"
 #include "Base64.hpp"
 
-
 //#define SERVER_SUCCESS_STOP_LOG "\n\n¯\\_(ツ)_/¯ WebServ is stopped ¯\\_(ツ)_/¯\n\n"
 #define CONFIG_FILE_DEFAULT_PATH "./WEBSERV.CONF"
-
-
 
 bool g_sigpipe = false;
 
@@ -20,7 +17,7 @@ WebServ webserv;
 void StopSignalHandler(int signal) {
 	(void)signal;
 	webserv.stop();
-	std::cout << "server stopped" << std::endl;
+
 	exit(EXIT_SUCCESS);
 }
 
@@ -40,35 +37,25 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    signal(SIGINT, StopSignalHandler);
-    signal(SIGPIPE, sigPipeHandler);
-
-
-
-
-
     if  (argc == 2) {
         path_to_config = argv[1];
     } else  {
         path_to_config = CONFIG_FILE_DEFAULT_PATH;
     }
 
+	signal(SIGINT, StopSignalHandler);
+	signal(SIGPIPE, sigPipeHandler);
+
     try
     {
         Config _config = Config(path_to_config);
-
         WebServ::servers_list = _config.getServersList();
-        WebServ::start();
 
-        webserv.serveConnections();
+		WebServ::start();
+		WebServ::stop();
     }
     catch (Config::BadConfigException & e)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    WebServ::stop();
-    std::cout << "server stopped" << std::endl;
+    {}
     return 0;
 }
 

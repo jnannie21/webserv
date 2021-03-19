@@ -14,7 +14,6 @@ std::list<std::string> WebServ::_lang_code_list;
 std::map<std::string, std::list<int> > WebServ::_already_listening_host_plus_port;
 
 void WebServ::start() {
-	checkAndSetTimeZoneCorrection();
 	initLanguageCodesList();
 
 	char *absolute_path = getcwd(NULL, 0);
@@ -29,25 +28,15 @@ void WebServ::start() {
 	std::list<ServerContext*>::const_iterator it = servers_list.begin();
 	std::list<ServerContext*>::const_iterator ite = servers_list.end();
 
-	int i = 1;
 	while (it != ite) {
 
-		const std::list<LocationContext*>& locations =  (*it)->getLocationsList();
-		std::list<LocationContext*>::const_iterator loc_it = locations.begin();
-
-		while (loc_it != locations.end()) {
-			if ((*loc_it)->isExtLocation()) {
-				const std::string& ext = (*loc_it)->getLocationExtension();
-				if (!ext.empty()) {
-				}
-			}
-			++loc_it;
-		}
 		Server *temp = new Server((*it));
-		addServer(temp);
+		_servers.push_back(temp);
 		++it;
-		i++;
 	}
+
+	serveConnections();
+
 	std::cout << "Server(s) are started" << std::endl;
 }
 
@@ -58,6 +47,7 @@ void WebServ::stop() {
 		delete *_servers_it;
 		++_servers_it;
 	}
+	std::cout << "server stopped" << std::endl;
 }
 
 
@@ -87,10 +77,6 @@ bool WebServ::isAlreadyListeningHostPlusPort(const std::string& host_str, int po
         }
         return true;
     }
-}
-
-void WebServ::addServer(Server* server) {
-    _servers.push_back(server);
 }
 
 int WebServ::getMaxFD(void) {
@@ -175,14 +161,3 @@ void WebServ::initLanguageCodesList(void)
 	_lang_code_list.push_back("en");
 	_lang_code_list.push_back("uk");
 }
-
-void WebServ::checkAndSetTimeZoneCorrection(void) {
-	struct timeval	current;
-
-	if (gettimeofday(&current, NULL)) {
-		utils::exitWithLog();
-	}
-}
-
-
-

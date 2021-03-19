@@ -48,21 +48,6 @@ Listener::Listener(const std::string &host, in_addr_t host_addr, int port)
 		utils::exitWithLog();
 }
 
-//template <class Key, class Value>
-//Key max_map_key(const std::map<Key, Value>& map_value) {
-//    Key max_value = map_value.begin()->first;
-//
-//    typename std::map<Key, Value>::const_iterator it = map_value.begin();
-//
-//    while (it != map_value.end()) {
-//        if (it->first > max_value) {
-//            max_value = it->first;
-//        }
-//        ++it;
-//    }
-//    return max_value;
-//}
-
 void Listener::updateMaxFD(void) {
 	int max_tmp = _listener;
 	if (!_clients_read.empty()) {

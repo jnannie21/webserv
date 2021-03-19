@@ -18,18 +18,13 @@ class LocationContext;
 class ServerContext : public AContext {
 
 public:
+	ServerContext();
+	~ServerContext(void);
 
     // 'R' stands for router using
     const std::list<LocationContext*>& R_getExactLocationsList(void) const;
     const std::list<LocationContext*>& R_getNonExactLocationsList(void) const;
     const std::list<LocationContext*>& R_getExtensionLocationsList(void) const;
-
-
-
-    ServerContext() :
-        is_server_names_were_updated(false) { _server_names.push_back("");  };
-
-    ~ServerContext(void);
 
     const std::map<std::string, std::list<int> >&  getHostsAndPorts(void) const;
     const std::list<std::string>& getServerNames(void) const;
@@ -54,6 +49,7 @@ public:
 private:
     std::list<LocationContext*> _locations;
     std::map<std::string, std::list<int> > _hosts_ports;
+//    std::map<std::string, std::list<int> > _hosts_ports_dup;
     std::list<std::string> _server_names;
 
     bool is_server_names_were_updated;

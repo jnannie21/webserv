@@ -44,7 +44,6 @@ public:
     static void setInAlreadyListeningHostPlusPort(const std::string& host_str, int port);
 
     static int getMaxFD();
-    static void addServer(Server* server);
 	static void serveConnections();
 
     static ServerContext*   findServerForHandlingRequest(const std::string& host,
@@ -67,7 +66,6 @@ public:
 
 	static void initLanguageCodesList(void);
 
-	static void checkAndSetTimeZoneCorrection(void);
 };
 
 #endif //WEBSERV_WEBSERV_HPP

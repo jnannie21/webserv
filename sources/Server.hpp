@@ -15,7 +15,11 @@ public:
     Server(){}
     Server(ServerContext* server_context);
     ~Server();
-    const std::list<Listener*> & getListeners(void) const { return _listeners; };
+    const std::list<Listener*> & getListeners(void) const;
+
+private:
+	in_addr_t _getHostInetAddrFromStr(const std::string& host_str);
+
 private:
     std::list<Listener*> _listeners;
 };
