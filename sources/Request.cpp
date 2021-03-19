@@ -6,6 +6,41 @@
 #include <set>
 #include "Request.hpp"
 
+
+Request::Request()
+		: _status_code(200),
+		  _raw_request(""),
+		  _remote_addr(),
+		  _server_port(),
+		  _close_connection(false),
+		  _handling_server(NULL),
+		  _handling_location(NULL),
+		  _is_alias_path(false),
+		  _body_bytes_read(0),
+		  _header_has_been_read(false),
+		  _is_need_writing_body_to_file(false),
+		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
+		  _is_chunked(false),
+		  _lang_file_pos(0) {}
+
+Request::Request(struct sockaddr_in & remote_addr, int server_port)
+		:  _status_code(200),
+		   _raw_request(""),
+		   _remote_addr(remote_addr),
+		   _server_port(server_port),
+		   _close_connection(false),
+		   _handling_server(NULL),
+		   _handling_location(NULL),
+		   _is_alias_path(false),
+		   _body_bytes_read(0),
+		   _header_has_been_read(false),
+		   _is_need_writing_body_to_file(false),
+		   _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
+		   _is_chunked(false),
+		   _lang_file_pos(0) {}
+
+Request::~Request() {}
+
 /*
  * return true if METHOD IS NOT ALLOWED BY CONFIG
  * Author: Airat (GDrake)
@@ -114,18 +149,18 @@ Pair<std::string, float> parseValueAndQuality(std::string str) {
     return Pair<std::string, float>(str.substr(0, q_pos), quality);
 }
 
-const std::list<int> Request::OK_STATUS_CODES = Request::initOkStatusCodes();
+//const std::list<int> Request::OK_STATUS_CODES = Request::initOkStatusCodes();
 const std::set<std::string> Request::implemented_headers = Request::initRequestHeaders();
 
-std::list<int> Request::initOkStatusCodes(void) {
-    std::list<int> codes;
-
-    codes.push_back(200);
-    codes.push_back(204);
-    codes.push_back(201);
-    codes.push_back(100);
-    return codes;
-}
+//std::list<int> Request::initOkStatusCodes(void) {
+//    std::list<int> codes;
+//
+//    codes.push_back(200);
+//    codes.push_back(204);
+//    codes.push_back(201);
+//    codes.push_back(100);
+//    return codes;
+//}
 
 std::set<std::string> Request::initRequestHeaders() {
 	std::set<std::string> implemented_headers;
@@ -147,40 +182,6 @@ std::set<std::string> Request::initRequestHeaders() {
     implemented_headers.insert("content-range"); // https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
 	return implemented_headers;
 }
-
-Request::Request()
-		: _status_code(200),
-		_raw_request(""),
-		  _remote_addr(),
-		  _server_port(),
-		  _close_connection(false),
-          _handling_server(NULL),
-          _handling_location(NULL),
-		  _is_alias_path(false),
-		  _header_was_read(false),
-//          _only_content_length_read_body_size(0),
-		  _is_need_writing_body_to_file(false),
-		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
-		  _is_chunked(false),
-		  _lang_file_pos(0) {}
-
-Request::Request(struct sockaddr_in & remote_addr, int server_port)
-		:  _status_code(200),
-           _raw_request(""),
-		  _remote_addr(remote_addr),
-		  _server_port(server_port),
-		  _close_connection(false),
-           _handling_server(NULL),
-           _handling_location(NULL),
-		  _is_alias_path(false),
-		  _header_was_read(false),
-//           _only_content_length_read_body_size(0),
-		  _is_need_writing_body_to_file(false),
-          _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
-          _is_chunked(false),
-          _lang_file_pos(0) {}
-
-Request::~Request() {}
 
 void Request::setStatusCode(int status_code) {
 	_status_code = status_code;
@@ -332,7 +333,7 @@ void Request::parseHeaders() {
 		return setStatusCode(400);
 }
 
-void    Request::parsURL() {
+void    Request::parsUri() {
 	std::string url = _request_target;
 	std::string res;
 	std::string tmp;
@@ -484,9 +485,9 @@ void Request::handleAcceptCharsetHeader(void) {
     }
 }
 
-void Request::handleAcceptLanguageHeader(bool is_header_exists) {
+void Request::handleAcceptLanguageHeader() {
     if (_lang_file_pos) {
-        if (is_header_exists)
+        if (_headers.count("accept-language"))
         {
             std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
             std::list<std::string>::const_iterator it = values.begin();
@@ -527,9 +528,7 @@ void Request::handleAcceptLanguageHeader(bool is_header_exists) {
             target.insert(_lang_file_pos, DEFAULT_RESPONSE_LANGUAGE);
             _request_target = target;
         }
-
     }
-
 }
 
 void Request::appendRequestTarget(std::string & filename, std::string &request_target) {
@@ -568,13 +567,10 @@ void Request::setReponseContentLang(const std::string& lang) { _response_content
 std::string &           Request::getRawRequest(void) { return this->_raw_request;}
 const std::string&      Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
 int                     Request::getStatusCode() { return _status_code;}
-//long long               Request::getOnlyContentLengthReadBodySize(void) { return _only_content_length_read_body_size;}
-//bool                    Request::getFileExistenceStatus(void) const { return _is_file_exists;}
 bool                    Request::getNeedWritingBodyToFile(void) const { return _is_need_writing_body_to_file;}
 const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
 const std::string&      Request::getCgiScriptPathForRequest(void) const { return _cgi_script_path;}
 
-//void Request::increaseOnlyContentLengthReadBodySize(long bytes_read) { _only_content_length_read_body_size += bytes_read;}
 
 bool Request::isStatusCodeOk() {
 //	std::list<int>::const_iterator found = std::find(OK_STATUS_CODES.begin(), OK_STATUS_CODES.end(), _status_code);
@@ -586,26 +582,7 @@ bool Request::isStatusCodeOk() {
 	return _status_code == 200;
 }
 
-bool Request::checkClientMaxBodySize(void) {
-	long long client_max_body_size;
-	if (_handling_location) {
-		client_max_body_size = _handling_location->getClientMaxBodySizeInfo();
-	} else {
-		client_max_body_size = _handling_server->getClientMaxBodySizeInfo();
-	}
-
-	std::map<std::string, std::string>::const_iterator found = _headers.find("content-length");
-	if (found != _headers.end()) {
-		long long content_length = libft::stoll_base(_headers["content-length"], 10);
-		if (client_max_body_size && content_length > client_max_body_size) {
-			setStatusCode(413);
-			return false;
-		}
-	}
-	return true;
-}
-
-bool Request::checkClientMaxBodySize(long body_size) {
+void Request::checkForMaxBodySize(long body_size) {
 	long client_max_body_size;
 	if (_handling_location) {
 		client_max_body_size = _handling_location->getClientMaxBodySizeInfo();
@@ -615,51 +592,31 @@ bool Request::checkClientMaxBodySize(long body_size) {
 
 	if (client_max_body_size && (body_size > client_max_body_size)) {
 		setStatusCode(413);
-		return false;
 	}
-	return true;
 }
 
 void Request::writeBodyReadBytesIntoFile() {
 	int file = open(_put_filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0666);
 	if (file <= 0) {
 		setStatusCode(500);
-//		return false;
 	}
 
 	write(file, _content.c_str(), _content.size());
 	_content.clear();
 	close(file);
-//	return true;
 }
 
-//void Request::checkFile(std::string & filename) {
-//	struct stat buffer;
-//	if (stat (filename.c_str(), &buffer) < 0)
-//		setStatusCode(500);
-//}
 
 bool Request::checkIfFileExists(void) {
 	struct stat buffer;
 	return (stat (_put_filename.c_str(), &buffer) == 0);
 }
 
-//bool Request::checkIfFileExists(const std::string& full_filename) {
-//	struct stat buffer;
-//	return (stat (full_filename.c_str(), &buffer) == 0);
-//}
 
 bool Request::isRegFileExists(const std::string& full_filename) {
 	struct stat buffer;
 	return ((stat (full_filename.c_str(), &buffer) == 0) && S_ISREG(buffer.st_mode));
 }
-
-//bool Request::isConcreteHeaderExists(const std::string& header_name) {
-//	if (_headers.find(header_name) == _headers.end()) {
-//		return false;
-//	}
-//	return true;
-//}
 
 bool Request::targetIsFile(void) {
 	struct stat info_buf;
@@ -667,7 +624,6 @@ bool Request::targetIsFile(void) {
 	if (stat(_put_filename.c_str(), &info_buf) == -1) {
 		std::cout << strerror(errno) << std::endl;
 		setStatusCode(500);
-//		return false;
 	}
 
 	int file_type = info_buf.st_mode & S_IFMT;
@@ -676,6 +632,3 @@ bool Request::targetIsFile(void) {
 		return true;
 	return false;
 }
-
-//// Accept-Charset and Accept-Language Headers Handlers END
-

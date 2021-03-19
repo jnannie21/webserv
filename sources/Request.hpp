@@ -21,10 +21,10 @@ class Request {
 
 public:
 	static std::set<std::string>    initRequestHeaders();
-	static std::list<int>           initOkStatusCodes(void);
+//	static std::list<int>           initOkStatusCodes(void);
 
 	static const std::set<std::string>  implemented_headers;
-	static const std::list<int>         OK_STATUS_CODES;
+//	static const std::list<int>         OK_STATUS_CODES;
 
 private:
 	int                             _status_code;
@@ -42,13 +42,13 @@ private:
 	LocationContext*                    _handling_location;
 	std::string                         _absolute_root_path_for_request;
 	bool                                _is_alias_path;
-	std::size_t                         _bytes_read;
+//	std::size_t                         _bytes_read;
 	std::size_t                         _body_bytes_read;
 	std::string                         _put_filename;
 
-	bool                _header_was_read;
+	bool                _header_has_been_read;
 	bool                _file_exists;
-	long long           _only_content_length_read_body_size;
+//	long long           _only_content_length_read_body_size;
 	bool                _is_need_writing_body_to_file;
 	std::string         _cgi_script_path;
 	std::string         _response_content_lang;
@@ -87,16 +87,16 @@ public:
 	const std::string&      getCgiScriptPathForRequest(void) const;
 
 	void parseRequestLine(void);
-	void parsURL();
+	void parsUri();
 	void parseHeaders(void);
 	void handleExpectHeader(void);
 	void handleAcceptCharsetHeader(void);
-	void handleAcceptLanguageHeader(bool is_header_exists);
+	void handleAcceptLanguageHeader();
 //	void increaseOnlyContentLengthReadBodySize(long bytes_read);
 //	bool isHeaderWasRead(void) const;
 	bool isStatusCodeOk();
-	bool checkClientMaxBodySize(void);
-	bool checkClientMaxBodySize(long body_size);
+//	void checkClientMaxBodySize(void);
+	void checkForMaxBodySize(long body_size);
 	void writeBodyReadBytesIntoFile();
 //	void checkFile(std::string & filename);
 	bool checkIfFileExists(void);
@@ -108,7 +108,5 @@ public:
 	bool isMethodLimited(const LocationContext& handling_location);
 	std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(std::string value);
 };
-
-
 
 #endif

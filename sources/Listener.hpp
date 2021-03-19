@@ -24,15 +24,18 @@ public:
 	void updateMaxFD(void);
 	void acceptConnection(void);
 	void processConnections(fd_set* globalReadSetPtr, fd_set* globalWriteSetPtr);
-	void handleRequests(fd_set* globalReadSetPtr);
-	void handleResponses(fd_set* globalWriteSetPtr);
-    void closeSocket(std::list<int>::iterator & it);
 
-	// Airat (GDrake)
-    bool checkIfHeaderHasRead(Request* request);
-    bool continueReadBody(Request* request);
-    void processHeaders(int client_socket);
+private:
+	void _handleRequests(fd_set* globalReadSetPtr);
+	void _handleResponses(fd_set* globalWriteSetPtr);
+    void _closeSocket(std::list<int>::iterator & it);
+	long _get_time();
+	bool _checkIfHeaderHasBeenRead(Request* request);
+    bool _continueReadBody(Request* request);
+    void _processHeaders(int client_socket);
 	bool _readBody(Request * request, int socket);
+
+	std::vector<std::string> parser_log_pass(std::string file, Request* request);
 
 private:
 	int _listener;
@@ -48,9 +51,6 @@ private:
 	std::map<int, Request> _client_requests;
 	std::map<int, Response> _client_response;
 	std::map<int, long> _last_time;
-
-	long _get_time();
-    std::vector<std::string> parser_log_pass(std::string file, Request* request);
 };
 
 

@@ -793,7 +793,7 @@ void Response::generateResponse() {
 	if (_request->isStatusCodeOk()) {
 	    try
         {
-            _request->checkClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
+//            _request->checkClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
             _checkForAcceptPrefixHeaders();
 
 //            if (_request->isStatusCodeOk()) {
@@ -849,11 +849,13 @@ void Response::_checkForAcceptPrefixHeaders(void) {
         _request->handleAcceptCharsetHeader();
     }
 
-    if (_request->_headers.count("accept-language")) {
-        _request->handleAcceptLanguageHeader(true);
-    } else {
-        _request->handleAcceptLanguageHeader(false);
-    }
+	_request->handleAcceptLanguageHeader();
+
+//    if (_request->_headers.count("accept-language")) {
+//        _request->handleAcceptLanguageHeader(true);
+//    } else {
+//        _request->handleAcceptLanguageHeader(false);
+//    }
 }
 
 
