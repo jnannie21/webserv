@@ -382,7 +382,6 @@ void Listener::handleRequests(fd_set* globalReadSetPtr) {
 							++it;
                     }
                 }
-                    // check for timeout
                 else {
                     if ((_get_time() - _last_time[*it]) > TIME_OUT) {
                         std::cout << "socket " << *it << " closed due to timeout" << std::endl;

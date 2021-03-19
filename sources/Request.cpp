@@ -577,13 +577,13 @@ const std::string&      Request::getCgiScriptPathForRequest(void) const { return
 //void Request::increaseOnlyContentLengthReadBodySize(long bytes_read) { _only_content_length_read_body_size += bytes_read;}
 
 bool Request::isStatusCodeOk() {
-	std::list<int>::const_iterator found = std::find(OK_STATUS_CODES.begin(), OK_STATUS_CODES.end(), _status_code);
-
-	if (found == OK_STATUS_CODES.end()) {
-		return false;
-	}
-	return true;
-//	return _status_code == 200;
+//	std::list<int>::const_iterator found = std::find(OK_STATUS_CODES.begin(), OK_STATUS_CODES.end(), _status_code);
+//
+//	if (found == OK_STATUS_CODES.end()) {
+//		return false;
+//	}
+//	return true;
+	return _status_code == 200;
 }
 
 bool Request::checkClientMaxBodySize(void) {

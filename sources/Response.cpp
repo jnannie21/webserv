@@ -303,7 +303,7 @@ const std::string Response::_searchForErrorPageLinkAndSetChangeError(void) const
 
 void Response::_generateDefaultResponseByStatusCode() {
     _content_type = "Content-Type: text/html;charset=utf-8\r\n";
-    if (_request->_method != "HEAD")
+    if (_request->_method != "HEAD" && _request->_method != "PUT")
         _content.append(libft::ultostr_base(_request->getStatusCode(), 10)).append(" ").append(Response::status_codes[_request->getStatusCode()]).append("\r\n");
 
     _generateStatusLine();
@@ -312,7 +312,7 @@ void Response::_generateDefaultResponseByStatusCode() {
         _www_authenticate = _getWwwAuthenticateHeader();
     }
 
-    if (_request->getStatusCode() != 100){ // cURL dont recognize 100 status code response with headers
+    if (_request->getStatusCode() != 100) { // cURL dont recognize 100 status code response with headers
         _generateHeaders();
         _raw_response.append(_content);
     }
