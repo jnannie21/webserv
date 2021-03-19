@@ -217,7 +217,7 @@ void Response::_generateHeaders() {
 	_raw_response += _location;
 	_raw_response += _content_location;
 
-    if (_request->_is_lang_file_pos)
+    if (_request->_lang_file_pos)
         _raw_response += "Content-Language: " "en-US, ru-RU" "\r\n";
 
     for (std::map<std::string, std::string>::iterator it = _cgi_headers.begin(); it != _cgi_headers.end(); ++it) {
@@ -739,21 +739,16 @@ void Response::_generateHeadResponse() {
 	if (!_request->isStatusCodeOk())
 		return ;
 
-
-
 	_generateStatusLine();
 	_generateHeaders();
 }
 
 void Response::_generatePutResponse() {
-    bool file_was_at_start = _request->getFileExistenceStatus();
-
-    if (file_was_at_start) {
-        _request->setStatusCode(204);
+    if (_request->_file_exists) {
+		_request->setStatusCode(204);
     } else {
-        _request->setStatusCode(201);
-        _content_location = "Content-Location: " + _request->_request_target + "\r\n";
-
+		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
+		_request->setStatusCode(201);
     }
 
     _generateStatusLine();
@@ -801,7 +796,7 @@ void Response::generateResponse() {
             _request->checkClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
             _checkForAcceptPrefixHeaders();
 
-            if (_request->isStatusCodeOk()) {
+//            if (_request->isStatusCodeOk()) {
                 if (_request->_method == "GET") {
                     _generateGetResponse();
                 } else if (_request->_method == "HEAD") {
@@ -813,7 +808,7 @@ void Response::generateResponse() {
                 } else {
                     _request->setStatusCode(501); // 501 Not Implemented
                 }
-            }
+//            }
         }
 	    catch (WebServ::NotOKStatusCodeException& e) {}
 	}

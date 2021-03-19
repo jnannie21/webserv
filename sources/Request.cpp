@@ -157,13 +157,12 @@ Request::Request()
           _handling_server(NULL),
           _handling_location(NULL),
 		  _is_alias_path(false),
-		  _header_end_pos(0),
 		  _header_was_read(false),
-          _only_content_length_read_body_size(0),
+//          _only_content_length_read_body_size(0),
 		  _is_need_writing_body_to_file(false),
 		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		  _is_chunked(false),
-		  _is_lang_file_pos(0) {}
+		  _lang_file_pos(0) {}
 
 Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		:  _status_code(200),
@@ -174,13 +173,12 @@ Request::Request(struct sockaddr_in & remote_addr, int server_port)
            _handling_server(NULL),
            _handling_location(NULL),
 		  _is_alias_path(false),
-		  _header_end_pos(0),
 		  _header_was_read(false),
-           _only_content_length_read_body_size(0),
+//           _only_content_length_read_body_size(0),
 		  _is_need_writing_body_to_file(false),
           _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
           _is_chunked(false),
-          _is_lang_file_pos(0) {}
+          _lang_file_pos(0) {}
 
 Request::~Request() {}
 
@@ -215,7 +213,7 @@ void Request::setAbsoluteRootPathForRequest(void) {
     }
 }
 
-std::string Request::getAbsolutePathForPUTRequests(void) const {
+std::string Request::getAbsolutePathForPutRequests(void) const {
     std::string globalRootPath = WebServ::getWebServRootPath();
     std::string cont_root_path;
 
@@ -449,9 +447,9 @@ void Request::handleExpectHeader(void) {
         libft::string_to_lower(value);
 
         if (value != "100-continue") {
-            _status_code = 417;
+            setStatusCode(417);
         } else {
-            _status_code = 100;
+			setStatusCode(100);
         }
 
     }
@@ -487,7 +485,7 @@ void Request::handleAcceptCharsetHeader(void) {
 }
 
 void Request::handleAcceptLanguageHeader(bool is_header_exists) {
-    if (_is_lang_file_pos) {
+    if (_lang_file_pos) {
         if (is_header_exists)
         {
             std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
@@ -496,7 +494,7 @@ void Request::handleAcceptLanguageHeader(bool is_header_exists) {
             bool is_found = false;
             while (it != values.end()) {
                 std::string target = _request_target;
-                target.insert(_is_lang_file_pos, *it);
+                target.insert(_lang_file_pos, *it);
 
                 std::string full_filename = getAbsoluteRootPathForRequest();
 				appendRequestTarget(full_filename, target);
@@ -512,7 +510,7 @@ void Request::handleAcceptLanguageHeader(bool is_header_exists) {
                 is_found = (std::find(values.begin(), values.end(), "*") != values.end());
                 if (is_found) {
                     std::string target = _request_target;
-                    target.insert(_is_lang_file_pos, DEFAULT_RESPONSE_LANGUAGE);
+                    target.insert(_lang_file_pos, DEFAULT_RESPONSE_LANGUAGE);
                     is_found = true;
                     setReponseContentLang(*it);
                     _request_target = target;
@@ -523,10 +521,10 @@ void Request::handleAcceptLanguageHeader(bool is_header_exists) {
                 setStatusCode(406);
             }
         }
-        else if (_request_target[_is_lang_file_pos] == '.')
+        else if (_request_target[_lang_file_pos] == '.')
         {
             std::string target = _request_target;
-            target.insert(_is_lang_file_pos, DEFAULT_RESPONSE_LANGUAGE);
+            target.insert(_lang_file_pos, DEFAULT_RESPONSE_LANGUAGE);
             _request_target = target;
         }
 
@@ -561,9 +559,7 @@ void Request::appendRequestTarget(std::string & filename, std::string &request_t
 void Request::setStatusCodeNoExept(int status_code) { _status_code = status_code;}
 void Request::setHandlingServer(ServerContext* handling_server) { _handling_server = handling_server;}
 void Request::setHandlingLocation(LocationContext* location_to_route) { _handling_location = location_to_route;}
-void Request::setHeaderWasRead(void) { _header_was_read = true; }
-void Request::setHeaderEndPos(std::size_t val) { _header_end_pos = val;}
-void Request::setFileExistenceStatus(bool value) { _is_file_exists = value;}
+//void Request::setFileExistenceStatus(bool value) { _is_file_exists = value;}
 void Request::setNeedWritingBodyToFile(bool value) { _is_need_writing_body_to_file = value;}
 void Request::setCgiScriptPathForRequest(const std::string& path) { _cgi_script_path = path;}
 void Request::setHostAndPort(const std::string& host, const int port) { _host = host;  _port = port;}
@@ -572,15 +568,13 @@ void Request::setReponseContentLang(const std::string& lang) { _response_content
 std::string &           Request::getRawRequest(void) { return this->_raw_request;}
 const std::string&      Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
 int                     Request::getStatusCode() { return _status_code;}
-long long               Request::getOnlyContentLengthReadBodySize(void) { return _only_content_length_read_body_size;}
-bool                    Request::getFileExistenceStatus(void) const { return _is_file_exists;}
+//long long               Request::getOnlyContentLengthReadBodySize(void) { return _only_content_length_read_body_size;}
+//bool                    Request::getFileExistenceStatus(void) const { return _is_file_exists;}
 bool                    Request::getNeedWritingBodyToFile(void) const { return _is_need_writing_body_to_file;}
 const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
 const std::string&      Request::getCgiScriptPathForRequest(void) const { return _cgi_script_path;}
 
-void Request::increaseOnlyContentLengthReadBodySize(long bytes_read) { _only_content_length_read_body_size += bytes_read;}
-
-bool Request::isHeaderWasRead(void) const { return _header_was_read; }
+//void Request::increaseOnlyContentLengthReadBodySize(long bytes_read) { _only_content_length_read_body_size += bytes_read;}
 
 bool Request::isStatusCodeOk() {
 	std::list<int>::const_iterator found = std::find(OK_STATUS_CODES.begin(), OK_STATUS_CODES.end(), _status_code);
@@ -589,6 +583,7 @@ bool Request::isStatusCodeOk() {
 		return false;
 	}
 	return true;
+//	return _status_code == 200;
 }
 
 bool Request::checkClientMaxBodySize(void) {
@@ -610,70 +605,69 @@ bool Request::checkClientMaxBodySize(void) {
 	return true;
 }
 
-bool Request::checkClientMaxBodySize(long long int value_to_check) {
-	long long client_max_body_size;
+bool Request::checkClientMaxBodySize(long body_size) {
+	long client_max_body_size;
 	if (_handling_location) {
 		client_max_body_size = _handling_location->getClientMaxBodySizeInfo();
 	} else {
 		client_max_body_size = _handling_server->getClientMaxBodySizeInfo();
 	}
 
-
-	if (client_max_body_size && (value_to_check > client_max_body_size)) {
+	if (client_max_body_size && (body_size > client_max_body_size)) {
 		setStatusCode(413);
 		return false;
 	}
 	return true;
 }
 
-bool Request::writeBodyReadBytesIntoFile() {
-	int file = open(_full_filename.c_str(), O_RDWR | O_TRUNC, 0666);
+void Request::writeBodyReadBytesIntoFile() {
+	int file = open(_put_filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0666);
 	if (file <= 0) {
-		_status_code = 500;
-		return false;
+		setStatusCode(500);
+//		return false;
 	}
 
 	write(file, _content.c_str(), _content.size());
 	_content.clear();
 	close(file);
-	return true;
+//	return true;
 }
 
-void Request::checkFile(std::string & filename) {
+//void Request::checkFile(std::string & filename) {
+//	struct stat buffer;
+//	if (stat (filename.c_str(), &buffer) < 0)
+//		setStatusCode(500);
+//}
+
+bool Request::checkIfFileExists(void) {
 	struct stat buffer;
-	if (stat (filename.c_str(), &buffer) < 0)
-		setStatusCode(500);
+	return (stat (_put_filename.c_str(), &buffer) == 0);
 }
 
-bool Request::isFileExists(void) {
-	struct stat buffer;
-	return (stat (_full_filename.c_str(), &buffer) == 0);
-}
-
-bool Request::isFileExists(const std::string& full_filename) {
-	struct stat buffer;
-	return (stat (full_filename.c_str(), &buffer) == 0);
-}
+//bool Request::checkIfFileExists(const std::string& full_filename) {
+//	struct stat buffer;
+//	return (stat (full_filename.c_str(), &buffer) == 0);
+//}
 
 bool Request::isRegFileExists(const std::string& full_filename) {
 	struct stat buffer;
 	return ((stat (full_filename.c_str(), &buffer) == 0) && S_ISREG(buffer.st_mode));
 }
 
-bool Request::isConcreteHeaderExists(const std::string& header_name) {
-	if (_headers.find(header_name) == _headers.end()) {
-		return false;
-	}
-	return true;
-}
+//bool Request::isConcreteHeaderExists(const std::string& header_name) {
+//	if (_headers.find(header_name) == _headers.end()) {
+//		return false;
+//	}
+//	return true;
+//}
 
 bool Request::targetIsFile(void) {
 	struct stat info_buf;
 
-	if (stat(_full_filename.c_str(), &info_buf) == -1) {
+	if (stat(_put_filename.c_str(), &info_buf) == -1) {
 		std::cout << strerror(errno) << std::endl;
-		_status_code = 500;
-		return false;
+		setStatusCode(500);
+//		return false;
 	}
 
 	int file_type = info_buf.st_mode & S_IFMT;

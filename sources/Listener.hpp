@@ -26,12 +26,13 @@ public:
 	void processConnections(fd_set* globalReadSetPtr, fd_set* globalWriteSetPtr);
 	void handleRequests(fd_set* globalReadSetPtr);
 	void handleResponses(fd_set* globalWriteSetPtr);
-    void readError(std::list<int>::iterator & it);
+    void closeSocket(std::list<int>::iterator & it);
 
 	// Airat (GDrake)
-    bool readAndSetHeaderInfoInRequest(Request* request_obj);
-    bool continueReadBody(Request* request_obj);
-    bool processHeaderInfoForActions(int client_socket);
+    bool checkIfHeaderHasRead(Request* request);
+    bool continueReadBody(Request* request);
+    void processHeaders(int client_socket);
+	bool _readBody(Request * request, int socket);
 
 private:
 	int _listener;

@@ -300,7 +300,7 @@ void WebServ::routeRequest(const std::string& host, const int port, Request* _cl
 
     if (it != _client_request->_headers.end()) {
         host_from_header = it->second.substr(0, it->second.find(':')); //jnannie: header contains host:port so we must remove port
-    } else { // jnannie: header "host" must be, rfc7230 5.4
+    } else { // jnannie: header "host" must always be present, rfc7230 5.4
     	return _client_request->setStatusCode(400);
     }
 

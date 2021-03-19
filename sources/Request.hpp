@@ -12,8 +12,6 @@ class Request;
 
 #define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 
-#define BUFFER_SIZE 1024
-
 
 class Request {
 
@@ -44,13 +42,12 @@ private:
 	LocationContext*                    _handling_location;
 	std::string                         _absolute_root_path_for_request;
 	bool                                _is_alias_path;
-	char                                _buf[BUFFER_SIZE];
-	long                                 _bytes_read;
-	std::string                         _full_filename;
+	std::size_t                         _bytes_read;
+	std::size_t                         _body_bytes_read;
+	std::string                         _put_filename;
 
-	std::size_t         _header_end_pos;
 	bool                _header_was_read;
-	bool                _is_file_exists;
+	bool                _file_exists;
 	long long           _only_content_length_read_body_size;
 	bool                _is_need_writing_body_to_file;
 	std::string         _cgi_script_path;
@@ -59,7 +56,7 @@ private:
 	bool            _is_chunked;
 	std::string     _host;
 	int             _port;
-	std::size_t     _is_lang_file_pos;
+	std::size_t     _lang_file_pos;
 
 public:
 	Request();
@@ -71,20 +68,20 @@ public:
 	void setHandlingServer(ServerContext* handling_server);
 	void setHandlingLocation(LocationContext* location_to_route);
 	void setAbsoluteRootPathForRequest(void);
-	void setHeaderWasRead(void);
+//	void setHeaderWasRead(void);
 	void setHeaderEndPos(std::size_t val);
-	void setFileExistenceStatus(bool value);
+//	void setFileExistenceStatus(bool value);
 	void setNeedWritingBodyToFile(bool value);
 	void setCgiScriptPathForRequest(const std::string& path);
 	void setHostAndPort(const std::string& host, const int port);
 	void setReponseContentLang(const std::string& lang);
 
 	std::string &           getRawRequest(void);
-	std::string             getAbsolutePathForPUTRequests(void) const;
+	std::string             getAbsolutePathForPutRequests(void) const;
 	const std::string&      getAbsoluteRootPathForRequest(void) const;
 	int                     getStatusCode();
-	long long               getOnlyContentLengthReadBodySize(void);
-	bool                    getFileExistenceStatus(void) const;
+//	long long               getOnlyContentLengthReadBodySize(void);
+//	bool                    getFileExistenceStatus(void) const;
 	bool                    getNeedWritingBodyToFile(void) const;
 	const std::string&      getReponseContentLang(void);
 	const std::string&      getCgiScriptPathForRequest(void) const;
@@ -95,17 +92,17 @@ public:
 	void handleExpectHeader(void);
 	void handleAcceptCharsetHeader(void);
 	void handleAcceptLanguageHeader(bool is_header_exists);
-	void increaseOnlyContentLengthReadBodySize(long bytes_read);
-	bool isHeaderWasRead(void) const;
+//	void increaseOnlyContentLengthReadBodySize(long bytes_read);
+//	bool isHeaderWasRead(void) const;
 	bool isStatusCodeOk();
 	bool checkClientMaxBodySize(void);
-	bool checkClientMaxBodySize(long long int value_to_check);
-	bool writeBodyReadBytesIntoFile();
-	void checkFile(std::string & filename);
-	bool isFileExists(void);
-	bool isFileExists(const std::string& full_filename);
+	bool checkClientMaxBodySize(long body_size);
+	void writeBodyReadBytesIntoFile();
+//	void checkFile(std::string & filename);
+	bool checkIfFileExists(void);
+//	bool checkIfFileExists(const std::string& full_filename);
 	bool isRegFileExists(const std::string& full_filename);
-	bool isConcreteHeaderExists(const std::string& header_name);
+//	bool isConcreteHeaderExists(const std::string& header_name);
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);
 	bool isMethodLimited(const LocationContext& handling_location);
