@@ -29,14 +29,12 @@ public:
     const std::map<std::string, std::list<int> >&  getHostsAndPorts(void) const;
     const std::list<std::string>& getServerNames(void) const;
 
-    bool get_status_is_server_names_were_updated(void) const { return is_server_names_were_updated;}
-    void set_server_names_were_updated(bool value) { is_server_names_were_updated = value; }
-    void clear_server_names(void) { _server_names.clear(); }
+    bool get_status_is_server_names_were_updated(void) const;
+    void set_server_names_were_updated(bool value);
+    void clear_server_names(void);
 
 
-    const std::list<LocationContext*>& getLocationsList(void) const {
-        return _locations;
-    }
+    const std::list<LocationContext*>& getLocationsList(void) const;
 
     LocationContext* addLocation(const std::list<std::string>& location_uri_params);
 
@@ -49,7 +47,6 @@ public:
 private:
     std::list<LocationContext*> _locations;
     std::map<std::string, std::list<int> > _hosts_ports;
-//    std::map<std::string, std::list<int> > _hosts_ports_dup;
     std::list<std::string> _server_names;
 
     bool is_server_names_were_updated;
