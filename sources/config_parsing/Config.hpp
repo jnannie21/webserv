@@ -17,10 +17,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "../sources/utils.hpp"
-#include "../sources/get_next_line/get_next_line.hpp"
-#include "../sources/cpp_libft/libft.hpp"
-#include "../sources/cpp_libft/stl_containers_operator_overloading.cpp"
+#include "../utils.hpp"
+#include "../get_next_line/get_next_line.hpp"
+#include "../cpp_libft/libft.hpp"
+#include "../cpp_libft/stl_containers_operator_overloading.cpp"
 
 #include "ServerContext.hpp"
 

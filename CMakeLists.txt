@@ -23,8 +23,8 @@ set(UTILS_SRCS sources/utils.cpp sources/utils.hpp
         )
 
 
-set(CONFIG_PARSING_SRCS ${UTILS_SRCS} config_parsing/Config.cpp
-        config_parsing/AContext.hpp config_parsing/ServerContext.cpp config_parsing/LocationContext.cpp)
+set(CONFIG_PARSING_SRCS ${UTILS_SRCS} sources/config_parsing/Config.cpp
+        sources/config_parsing/AContext.hpp sources/config_parsing/ServerContext.cpp sources/config_parsing/LocationContext.cpp)
 
 set(SOURCE_PATH "sources/")
 

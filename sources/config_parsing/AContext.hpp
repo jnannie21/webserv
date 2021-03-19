@@ -8,9 +8,9 @@
 #include <list>
 #include <map>
 #include <string>
-#include "../sources/cpp_libft/libft.hpp"
-#include "../sources/Pair.hpp"
-#include "../sources/utils.hpp"
+#include "../cpp_libft/libft.hpp"
+#include "../Pair.hpp"
+#include "../utils.hpp"
 
 class AContext {
 public:

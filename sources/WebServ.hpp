@@ -9,7 +9,7 @@
 class WebServ;
 #include <vector>
 #include "Server.hpp"
-#include "../config_parsing/Config.hpp"
+#include "config_parsing/Config.hpp"
 
 #define  RETRY_AFTER_SECOND_DELAY "1"  // for header Retry-After
 

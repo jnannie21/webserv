@@ -29,9 +29,9 @@ SRCS =          sources/utils.cpp \
                 sources/Response.cpp \
                 sources/Base64.cpp \
 \
-                config_parsing/Config.cpp \
-                config_parsing/ServerContext.cpp \
-                config_parsing/LocationContext.cpp \
+                sources/config_parsing/Config.cpp \
+                sources/config_parsing/ServerContext.cpp \
+                sources/config_parsing/LocationContext.cpp \
                 sources/main.cpp
 
 

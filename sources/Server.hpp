@@ -7,7 +7,7 @@
 
 class Server;
 #include <list>
-#include "../config_parsing/ServerContext.hpp"
+#include "config_parsing/ServerContext.hpp"
 #include "Listener.hpp"
 
 class Server {

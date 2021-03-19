@@ -8,7 +8,7 @@ class Request;
 
 #include "WebServ.hpp"
 #include "Response.hpp"
-#include "../config_parsing/Config.hpp"
+#include "config_parsing/Config.hpp"
 
 #define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 
