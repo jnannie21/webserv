@@ -17,10 +17,10 @@ public:
 	Listener(const std::string& host, in_addr_t host_addr, int port);
 	~Listener(void);
 
-	int                     getListener(void) const { return _listener; }
-	const std::list<int>&   getReadClients(void) const { return _clients_read; }
-	const std::list<int>&   getWriteClients(void) const { return _clients_write; }
-	const int &             getMaxFD() const { return _max_fd; }
+	int getListener(void) const;
+	const std::list<int>& getReadClients(void) const;
+	const std::list<int>& getWriteClients(void) const;
+	const int & getMaxFD() const;
 	void updateMaxFD(void);
 	void acceptConnection(void);
 	void processConnections(fd_set* globalReadSetPtr, fd_set* globalWriteSetPtr);
@@ -46,7 +46,7 @@ private:
 	std::list<int> _clients_write; // second param for ready or not
 	std::map<int, Request> _client_requests;
 	std::map<int, Response> _client_response;
-	std::map<int, long> _time;
+	std::map<int, long> _last_time;
 
 	long _get_time();
     std::vector<std::string> parser_log_pass(std::string file, Request* request);

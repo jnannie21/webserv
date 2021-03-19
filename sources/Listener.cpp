@@ -48,6 +48,12 @@ Listener::Listener(const std::string &host, in_addr_t host_addr, int port)
 		utils::exitWithLog();
 }
 
+int                     Listener::getListener(void) const { return _listener; }
+const std::list<int>&   Listener::getReadClients(void) const { return _clients_read; }
+const std::list<int>&   Listener::getWriteClients(void) const { return _clients_write; }
+const int &             Listener::getMaxFD() const { return _max_fd; }
+
+
 void Listener::updateMaxFD(void) {
 	int max_tmp = _listener;
 	if (!_clients_read.empty()) {
@@ -83,7 +89,7 @@ void Listener::acceptConnection(void) {
 	_client_requests.erase(sock);
 	_client_response.erase(sock);
 	_client_requests[sock] = Request(_remote_addr, _port);
-	_time[sock] = _get_time();
+	_last_time[sock] = _get_time();
 	_client_response[sock] = Response(&_client_requests[sock], sock);
 }
 
@@ -327,7 +333,7 @@ void Listener::handleRequests(fd_set* globalReadSetPtr) {
 						continue;
                     }
                     else
-                        _time[*it] = _get_time();
+						_last_time[*it] = _get_time();
                     request->_buf[request->_bytes_read] = '\0';
 
 					request->getRawRequest().append(request->_buf, request->_bytes_read);// собираем строку пока весь запрос не соберем
@@ -390,7 +396,7 @@ void Listener::handleRequests(fd_set* globalReadSetPtr) {
                 }
                     // if not ready for reading (socket not in SET)
                 else {
-                    if ((_get_time() - _time[fd]) > TIME_OUT) {
+                    if ((_get_time() - _last_time[fd]) > TIME_OUT) {
                         std::cout << "socket " << fd << " closed due to timeout" << std::endl;
                         readError(it);
                         continue;
