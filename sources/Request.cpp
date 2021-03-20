@@ -6,6 +6,29 @@
 #include <set>
 #include "Request.hpp"
 
+const std::set<std::string> Request::implemented_headers = Request::initRequestHeaders();
+
+std::set<std::string> Request::initRequestHeaders() {
+	std::set<std::string> implemented_headers;
+	implemented_headers.insert("accept-charset"); // Accept-Charset: utf-8  Accept-Charset: iso-8859-5, unicode-1-1;q=0.8
+	implemented_headers.insert("accept-language"); // Accept-Language: ru
+	implemented_headers.insert("authorization"); // Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+	implemented_headers.insert("content-language"); // Content-Language: en, ase, ru
+	implemented_headers.insert("content-length"); // Content-Length: 1348
+	implemented_headers.insert("content-location");
+	implemented_headers.insert("content-type"); // Content-Type: text/html;charset=utf-8
+	implemented_headers.insert("date"); // Date: Tue, 15 Nov 1994 08:12:31 GMT
+	implemented_headers.insert("host"); // Host: ru.wikipedia.org
+	implemented_headers.insert("last-modified");
+	implemented_headers.insert("referer"); // Referer: http://en.wikipedia.org/wiki/Main_Page
+	implemented_headers.insert("transfer-encoding"); // Transfer-Encoding: gzip, chunked
+	implemented_headers.insert("user-agent"); // User-Agent: Mozilla/5.0 (X11; Linux i686; rv:2.0.1) Gecko/20100101 Firefox/4.0.1
+	// for PUT method
+	implemented_headers.insert("expect"); // Expect: 100-continue
+	implemented_headers.insert("content-range"); // https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
+	return implemented_headers;
+}
+
 Request::Request()
 		: _status_code(200),
 		  _raw_request(""),
@@ -51,118 +74,6 @@ bool Request::isMethodAllowed(const LocationContext& handling_location) {
 		++it;
 	}
 	return true;
-}
-
-bool quality_sort_func(const Pair<std::string, float>& one, const Pair<std::string, float>& two) {
-    if (one.second >= two.second)
-        return true;
-    return false;
-}
-
-std::list<std::string> sortValuesByQuality(std::list<Pair<std::string, float> >& values_list) {
-
-    std::list<std::string> sorted_strs;
-
-    values_list.sort(quality_sort_func);
-
-    std::list<Pair<std::string, float> >::const_iterator it = values_list.begin();
-    while (it != values_list.end()) {
-        sorted_strs.push_back(it->first);
-        ++it;
-    }
-    return sorted_strs;
-}
-
-Pair<int, float> parseSpecificFloatValueForHeader(std::string str) {
-    int i = 0;
-    float value = 0;
-
-    Pair<int, float> err = Pair<int, float>(-1, -1);
-
-    std::size_t size = str.size();
-    if ((size > 5) || (size == 0)) {
-        return err;
-    }
-
-    // ===
-    if (str[i] == '0') {
-        i++;
-    } else if (str[i] == '1') {
-        value += 1;
-        i++;
-    } else {
-        return err;
-    }
-    size--;
-
-    if (!size)
-        return Pair<int, float>(i, value);
-
-    // ===
-    if (str[i] != '.')
-        return err;
-
-    i++;
-    size--;
-    if (!size)
-        return Pair<int, float>(i, value);
-
-    // ===
-    float divider = 10.0f;
-    while(size) {
-        if (libft::isdigit(str[i])) {
-            float tmp = static_cast<float>(str[i] - '0');
-            value += ( tmp / divider);
-            divider *= 10.0f;
-        }
-        else
-            return err;
-
-        i++;
-        size--;
-    }
-    return Pair<int, float>(i, value);
-}
-
-Pair<std::string, float> parseValueAndQuality(std::string str) {
-    float quality = 1.0f;
-    std::size_t q_pos = str.find(";q=");
-
-    if (q_pos == std::string::npos) {
-        return Pair<std::string, float>(str, quality);
-    }
-
-    std::string q_str = str.substr(q_pos+3);
-    Pair<int, float> quality_pair = parseSpecificFloatValueForHeader(q_str);
-    if (quality_pair.first != static_cast<int>(q_str.size())) {
-        quality = -1.0f;
-    }
-    quality = quality_pair.second;
-
-    return Pair<std::string, float>(str.substr(0, q_pos), quality);
-}
-
-const std::set<std::string> Request::implemented_headers = Request::initRequestHeaders();
-
-std::set<std::string> Request::initRequestHeaders() {
-	std::set<std::string> implemented_headers;
-	implemented_headers.insert("accept-charset"); // Accept-Charset: utf-8  Accept-Charset: iso-8859-5, unicode-1-1;q=0.8
-	implemented_headers.insert("accept-language"); // Accept-Language: ru
-	implemented_headers.insert("authorization"); // Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
-	implemented_headers.insert("content-language"); // Content-Language: en, ase, ru
-	implemented_headers.insert("content-length"); // Content-Length: 1348
-	implemented_headers.insert("content-location");
-	implemented_headers.insert("content-type"); // Content-Type: text/html;charset=utf-8
-	implemented_headers.insert("date"); // Date: Tue, 15 Nov 1994 08:12:31 GMT
-	implemented_headers.insert("host"); // Host: ru.wikipedia.org
-	implemented_headers.insert("last-modified");
-	implemented_headers.insert("referer"); // Referer: http://en.wikipedia.org/wiki/Main_Page
-	implemented_headers.insert("transfer-encoding"); // Transfer-Encoding: gzip, chunked
-    implemented_headers.insert("user-agent"); // User-Agent: Mozilla/5.0 (X11; Linux i686; rv:2.0.1) Gecko/20100101 Firefox/4.0.1
-    // for PUT method
-    implemented_headers.insert("expect"); // Expect: 100-continue
-    implemented_headers.insert("content-range"); // https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
-	return implemented_headers;
 }
 
 void Request::setStatusCode(int status_code) {
@@ -384,7 +295,7 @@ std::list<std::string> Request::parseAndSortAcceptPrefixHeadersByQuality(std::st
 
     while(!value.empty()) {
         pos = value.find_first_of(',');
-        with_quality.push_back(parseValueAndQuality(value.substr(0, pos)));
+        with_quality.push_back(_parseValueAndQuality(value.substr(0, pos)));
 
         if (pos != std::string::npos)
             pos++;
@@ -412,7 +323,7 @@ std::list<std::string> Request::parseAndSortAcceptPrefixHeadersByQuality(std::st
             }
         }
     }
-    return sortValuesByQuality(with_quality);
+    return _sortValuesByQuality(with_quality);
 }
 
 /*
@@ -587,4 +498,94 @@ bool Request::targetIsFile(void) {
 	if (file_type == S_IFREG)
 		return true;
 	return false;
+}
+
+
+bool Request::_qualityPred(const Pair<std::string, float>& first, const Pair<std::string, float>& second) {
+	if (first.second >= second.second)
+		return true;
+	return false;
+}
+
+std::list<std::string> Request::_sortValuesByQuality(std::list<Pair<std::string, float> >& values_list) {
+
+	std::list<std::string> sorted_strs;
+
+	values_list.sort(_qualityPred);
+
+	std::list<Pair<std::string, float> >::const_iterator it = values_list.begin();
+	while (it != values_list.end()) {
+		sorted_strs.push_back(it->first);
+		++it;
+	}
+	return sorted_strs;
+}
+
+Pair<int, float> Request::_parseSpecificFloatValueForHeader(std::string str) {
+	int i = 0;
+	float value = 0;
+
+	Pair<int, float> err = Pair<int, float>(-1, -1);
+
+	std::size_t size = str.size();
+	if ((size > 5) || (size == 0)) {
+		return err;
+	}
+
+	// ===
+	if (str[i] == '0') {
+		i++;
+	} else if (str[i] == '1') {
+		value += 1;
+		i++;
+	} else {
+		return err;
+	}
+	size--;
+
+	if (!size)
+		return Pair<int, float>(i, value);
+
+	// ===
+	if (str[i] != '.')
+		return err;
+
+	i++;
+	size--;
+	if (!size)
+		return Pair<int, float>(i, value);
+
+	// ===
+	float divider = 10.0f;
+	while(size) {
+		if (libft::isdigit(str[i])) {
+			float tmp = static_cast<float>(str[i] - '0');
+			value += ( tmp / divider);
+			divider *= 10.0f;
+		}
+		else
+			return err;
+
+		i++;
+		size--;
+	}
+	return Pair<int, float>(i, value);
+}
+
+Pair<std::string, float> Request::_parseValueAndQuality(std::string str) {
+	float quality = 1.0f;
+	std::size_t q_pos = str.find(";q=");
+
+	if (q_pos == std::string::npos) {
+		return Pair<std::string, float>(str, quality);
+	}
+
+	std::string q_str = str.substr(q_pos+3);
+	Pair<int, float> quality_pair = _parseSpecificFloatValueForHeader(q_str);
+	if (quality_pair.first != static_cast<int>(q_str.size())) {
+		quality = -1.0f;
+	}
+	quality = quality_pair.second;
+
+	return Pair<std::string, float>(str.substr(0, q_pos), quality);
 }

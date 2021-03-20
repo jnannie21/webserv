@@ -10,7 +10,6 @@
 
 #define MAX_HEADER_LINE_LENGTH 8192 //http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 
-
 class Request {
 	friend class Response;
 	friend class Listener;
@@ -60,8 +59,6 @@ public:
 	void setHandlingServer(ServerContext* handling_server);
 	void setHandlingLocation(LocationContext* location_to_route);
 	void setAbsoluteRootPathForRequest(void);
-	void setHeaderEndPos(std::size_t val);
-	void setNeedWritingBodyToFile(bool value);
 	void setCgiScriptPathForRequest(const std::string& path);
 	void setHostAndPort(const std::string& host, const int port);
 	void setReponseContentLang(const std::string& lang);
@@ -89,6 +86,12 @@ public:
 	void appendRequestTarget(std::string & filename, std::string &request_target);
 	bool isMethodAllowed(const LocationContext& handling_location);
 	std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(std::string value);
+
+private:
+	static bool _qualityPred(const Pair<std::string, float>& first, const Pair<std::string, float>& second);
+	std::list<std::string> _sortValuesByQuality(std::list<Pair<std::string, float> >& values_list);
+	Pair<int, float> _parseSpecificFloatValueForHeader(std::string str);
+	Pair<std::string, float> _parseValueAndQuality(std::string str);
 };
 
 #endif
