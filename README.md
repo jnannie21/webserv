@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to WebServ 🤖</h1>
+<h1 align="center">welcome to Webserv. command project for 21</h1>
 
 #### * Written on C++ 98
 <p>

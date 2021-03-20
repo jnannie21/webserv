@@ -12,10 +12,8 @@ public:
             : first(first), second(second)  {
     }
 
-
     First first;
     Second second;
-
 };
 
 #endif //WEBSERV_PAIR_HPP

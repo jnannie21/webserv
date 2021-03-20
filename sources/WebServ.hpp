@@ -5,8 +5,6 @@
 #ifndef WEBSERV_WEBSERV_HPP
 #define WEBSERV_WEBSERV_HPP
 
-
-class WebServ;
 #include <vector>
 #include "Server.hpp"
 #include "config_parsing/Config.hpp"
@@ -18,6 +16,9 @@ class WebServ;
 
 #define CHECK_ACCEPT_CHARSET_HEADER 1
 #define CHECK_ACCEPT_LANGUAGE_HEADER 1
+
+class Request;
+class Server;
 
 class WebServ {
 private:

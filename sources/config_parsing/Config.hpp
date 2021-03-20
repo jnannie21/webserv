@@ -8,11 +8,10 @@
 #include <string>
 #include <list>
 #include <map>
-#include <algorithm>    // std::find
+#include <algorithm>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
 
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -5,12 +5,14 @@
 #ifndef LISTENER_HPP
 #define LISTENER_HPP
 
-class Listener;
 #include <string>
 #include <list>
 #include <sys/socket.h>
 #include "Request.hpp"
 #include "Response.hpp"
+
+class Request;
+class Response;
 
 class Listener {
 public:

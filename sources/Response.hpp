@@ -5,14 +5,13 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
-class Response;
-
 #include "Request.hpp"
 #include <sys/socket.h>
 #include <string>
 #include <set>
 #include <list>
 
+class Request;
 
 class Response {
 public:
@@ -28,9 +27,9 @@ public:
 
 private:
 	void _generateGetResponse();
-	void _generateHeadResponseCore();
+	void _generateContentForGetRequest();
 	void _generateHeadResponse();
-//	void _generatePutResponse();
+	void _generatePutResponse();
 	void _generatePostResponse();
 	void _generateResponseByStatusCode();
 	void _generateStatusLine();
@@ -39,9 +38,6 @@ private:
 	std::string _generateAutoindex(std::string dir_name);
 	void _setContentTypeByFileExt(std::string & ext);
 	bool _isMethodAllowed();
-//	void _updateRequestForErrorPage(const std::string& error_page_link);
-//	void _generateDefaultResponseByStatusCode();
-//	void _generateResponseForErrorPage(void);
 	const std::string _getErrorPagePath() const;
 	void _readErrorPage(std::string & error_page);
 	void _checkForAcceptPrefixHeaders(void);
@@ -92,8 +88,6 @@ private:
 	bool _in_progress;
 	long _remains;
 	long _sent_len;
-//	int _error_code_for_generaion;
-
 };
 
 

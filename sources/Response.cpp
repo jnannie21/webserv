@@ -2,16 +2,13 @@
 // Created by jnannie on 2/13/21.
 //
 
-//#include <time.h>
 #include <sstream>
 #include <string>
 #include <set>
 #include <dirent.h>
-
 #include "Response.hpp"
 #include "Base64.hpp"
 #include <sys/time.h>
-
 
 extern bool g_sigpipe;
 
@@ -55,7 +52,7 @@ std::map<int,std::string> Response::_initStatusCodes() {
 	status_codes[305] = "USE PROXY";
 	status_codes[307] = "TEMPORARY REDIRECT";
 	status_codes[400] = "BAD REQUEST";
-	status_codes[401] = "UNAUTHORIZED"; // Authorization Required //UNAUTHORIZED
+	status_codes[401] = "UNAUTHORIZED";
 	status_codes[402] = "PAYMENT REQUIRED";
 	status_codes[403] = "FORBIDDEN";
 	status_codes[404] = "NOT FOUND";
@@ -73,7 +70,7 @@ std::map<int,std::string> Response::_initStatusCodes() {
 	status_codes[416] = "RANGE NOT SATISFIABLE";
 	status_codes[417] = "EXPECTATION FAILED";
 	status_codes[426] = "UPGRADE REQUIRED";
-	status_codes[500] = "INTERNAL SERVER ERROR"; // "UPGRADE REQUIRED";
+	status_codes[500] = "INTERNAL SERVER ERROR";
 	status_codes[501] = "NOT IMPLEMENTED";
 	status_codes[502] = "BAD GATEWAY";
 	status_codes[503] = "SERVICE UNAVAILABLE";
@@ -225,38 +222,6 @@ void Response::_generateHeaders() {
 	_raw_response += "\r\n";
 }
 
-//void Response::_updateRequestForErrorPage(const std::string& error_page_link) {
-//    _error_code_for_generaion = _request->getStatusCode();
-//
-//    _request->setStatusCode(200);
-//    if (_request->_method != "HEAD") {
-//        _request->_method = "GET";
-//    }
-//    _request->_request_target = error_page_link;
-////    WebServ::routeRequest(_request->_host, _request->_port, _request, _request->_request_target);
-//}
-
-//void Response::_generateResponseForErrorPage(void) {
-//    _generateHeadResponseCore();
-//
-//    if (_request->getStatusCode() == _error_code_for_generaion) {
-//        return _generateDefaultResponseByStatusCode();
-//    }
-//    _request->setStatusCodeNoExept(_error_code_for_generaion);
-//    _error_code_for_generaion = 200;
-//
-//    _generateStatusLine();
-//
-//	if (_request->getStatusCode() == 401) {
-//		_www_authenticate = _getWwwAuthenticateHeader();
-//	}
-//
-//    _generateHeaders();
-//    if (_request->_method != "PUT") {
-//        _raw_response += _content;
-//    }
-//}
-
 const std::string Response::_getErrorPagePath(void) const {
     AContext * context = (_request->_handling_location != NULL) ?
                          static_cast<AContext*>(_request->_handling_location) :
@@ -312,49 +277,9 @@ void Response::_readErrorPage(std::string & error_page) {
 	}
 }
 
-//void Response::_generateDefaultResponseByStatusCode() {
-//    _content_type = "Content-Type: text/html;charset=utf-8\r\n";
-//    if (_request->_method != "HEAD" && _request->_method != "PUT")
-//        _content.append(libft::ultostr_base(_request->getStatusCode(), 10)).append(" ").append(Response::status_codes[_request->getStatusCode()]).append("\r\n");
-//
-//    _generateStatusLine();
-//
-//    if (_request->getStatusCode() == 401) {
-//        _www_authenticate = _getWwwAuthenticateHeader();
-//    }
-//
-//    if (_request->getStatusCode() != 100) { // cURL dont recognize 100 status code response with headers
-//        _generateHeaders();
-//        _raw_response.append(_content);
-//    }
-//
-//}
-
 void Response::_generateResponseByStatusCode() {
-//    try
-//    {
-//
-//        std::string link = _searchForErrorPageLinkAndSetChangeError();
-////        _content = "";
-//        if (link.size()) {
-////            _updateRequestForErrorPage(link);
-////            _generateResponseForErrorPage();
-//        }
-//        else
-//        {
-//            _generateDefaultResponseByStatusCode();
-//        }
-//    }
-//    catch (WebServ::NotOKStatusCodeException &e)
-//    {
-//        _generateDefaultResponseByStatusCode();
-//    }
-
-	if (_request->_method == "PUT")
-		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
-
 	_content_type = "Content-Type: text/html;charset=utf-8\r\n";
-    if (_request->_method != "HEAD" && _request->_method != "PUT") {
+    if (_request->_method != "HEAD" && _request->isStatusCodeError()) {
 		std::string error_page = _getErrorPagePath();
     	if (error_page.size())
     		_readErrorPage(error_page);
@@ -382,12 +307,11 @@ void Response::_readFileToContent(std::string & filename) {
 	fd = open(filename.c_str(), O_RDONLY);
     if (fd <= 0) {
         _request->setStatusCode(500);
-        return ;
     }
 
 	while ((ret = read(fd, buf, 1024))) {
 		if (ret < 0)
-			return _request->setStatusCode(500);
+			_request->setStatusCode(500);
 		_content.append(buf, ret);
 	}
 	close(fd);
@@ -420,15 +344,6 @@ bool Response::_isMethodAllowed() {
 			return true;
 	}
 	return false;
-}
-
-void Response::_generateGetResponse() {
-	_generateHeadResponse();
-
-	if (!_request->isStatusCodeOk())
-		return ;
-
-    _raw_response += _content;
 }
 
 std::string Response::_getExt(std::string filename) {
@@ -516,8 +431,6 @@ void Response::_setEnv(std::vector<char *> & env, std::string & filename, std::m
 	env.push_back(NULL);
 }
 
-
-
 void Response::_runCgi(std::string & filename) { // filename is a *.php script
 	int pid;
     	int exit_status = 0;
@@ -543,7 +456,7 @@ void Response::_runCgi(std::string & filename) { // filename is a *.php script
 	long ret;
 	ret = write(fd_write, _request->_content.c_str(), _request->_content.size());
 	if (ret < 0) {
-		return _request->setStatusCode(500);
+		_request->setStatusCode(500);
 	}
 
 	close(fd_write);
@@ -582,7 +495,6 @@ void Response::_runCgi(std::string & filename) { // filename is a *.php script
 		}
 
 		int fd_read;
-
 		if ((fd_read = open(out_file_path.c_str(), O_RDONLY, S_IRWXU)) == -1) {
 			unlink(in_file_path.c_str());
 			_request->setStatusCode(500);
@@ -608,13 +520,11 @@ void Response::_runCgi(std::string & filename) { // filename is a *.php script
 	unlink(in_file_path.c_str());
 	unlink(out_file_path.c_str());
 
-	if (exit_status || !_request->isStatusCodeOk())
+	if (exit_status)
 		_request->setStatusCode(500);
 }
 
 void Response::_parseHeadersFromCgiResponse() { // the same as in request headers parsing
-	if (!_request->isStatusCodeOk())
-		return ;
 	std::string field_name;
 	std::string field_value;
 	size_t field_name_length;
@@ -627,22 +537,21 @@ void Response::_parseHeadersFromCgiResponse() { // the same as in request header
 	while (line_length != 0) {
 		if (line_length > MAX_HEADER_LINE_LENGTH
 			|| line_length == std::string::npos) {
-			return _request->setStatusCode(500); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
+			_request->setStatusCode(500); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 		}
 
 		field_name_length = headers.find(':'); // field-name
 		if (field_name_length == std::string::npos) {
-			return _request->setStatusCode(500);
+			_request->setStatusCode(500);
 		}
 		field_name = headers.substr(0, field_name_length);
 
 		libft::string_to_lower(field_name); // field_name is case-insensitive so we make it lowercase to make life easy
 
 		if (field_name.find(' ') != std::string::npos) { // no spaces inside field-name, rfc 2.3.4
-			return _request->setStatusCode(500);
+			_request->setStatusCode(500);
 		}
 		headers.erase(0, field_name_length + 1);
-
 
 		field_value_length = line_length - field_name_length - 1; // field-value
 		if (headers[0] == ' ') {
@@ -663,12 +572,10 @@ void Response::_parseHeadersFromCgiResponse() { // the same as in request header
 	_cgi_response.erase(0, headers_len);
 }
 
-
-void Response::_generateHeadResponseCore() {
-
+void Response::_generateContentForGetRequest() {
     if (!_isMethodAllowed() && (_request->getCgiScriptPathForRequest()).empty()) {
         _allow = _getAllowHeader();
-        return _request->setStatusCode(405);
+        _request->setStatusCode(405);
     }
 
     std::string filename = _request->getAbsoluteRootPathForRequest();
@@ -682,7 +589,7 @@ void Response::_generateHeadResponseCore() {
             if (filename[filename.size() - 1] != '/') {
                 _location = _getLocationHeader(false);
 				_retry_after = _getRetryAfterHeader();
-                return _request->setStatusCode(301); //Moved Permanently
+                _request->setStatusCode(301); //Moved Permanently
             }
             std::list<std::string> index_list;
             if (_request->_handling_location)
@@ -700,7 +607,7 @@ void Response::_generateHeadResponseCore() {
                     }
                 }
                 if (matching_index.empty() && !_request->_handling_server->isAutoindexEnabled() && (!_request->_handling_location || (_request->_handling_location && !_request->_handling_location->isAutoindexEnabled()))) { // test from subject wants 404 if there is index in config but file doesnt exist
-                    return _request->setStatusCode(404);
+                    _request->setStatusCode(404);
                 }
             }
         }
@@ -728,50 +635,48 @@ void Response::_generateHeadResponseCore() {
 				_location = _getLocationHeader(false);
 
                 _retry_after = _getRetryAfterHeader();
-                return _request->setStatusCode(301); //Moved Permanently
+                _request->setStatusCode(301); //Moved Permanently
             }
             if ((_request->_handling_location && _request->_handling_location->isAutoindexEnabled()) || _request->_handling_server->isAutoindexEnabled()) {
                 _content = _generateAutoindex(filename);
                 _content_type = "Content-Type: text/html;charset=utf-8\r\n";
             } else {
-                return _request->setStatusCode(403);
+                _request->setStatusCode(403);
             }
         } else {
-            return _request->setStatusCode(403);
+            _request->setStatusCode(403);
         }
     } else {
-        return _request->setStatusCode(404);
+        _request->setStatusCode(404);
     }
 }
 
-void Response::_generateHeadResponse() {
+void Response::_generateGetResponse() {
+	_generateContentForGetRequest();
 
-    _generateHeadResponseCore();
-	if (!_request->isStatusCodeOk())
-		return ;
+	_generateStatusLine();
+	_generateHeaders();
+	_raw_response += _content;
+}
+
+void Response::_generateHeadResponse() {
+	_generateContentForGetRequest();
 
 	_generateStatusLine();
 	_generateHeaders();
 }
 
-//void Response::_generatePutResponse() {
-//    if (_request->_file_exists) {
-//		_request->setStatusCode(204);
-//    } else {
-//		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
-//		_request->setStatusCode(201);
-//    }
-//
-//    _generateStatusLine();
-//    _generateHeaders();
-//    _raw_response += _content;
-//}
+void Response::_generatePutResponse() {
+	_content_location = "Content-Location: " + _request->_request_target + "\r\n";
+    _generateStatusLine();
+    _generateHeaders();
+}
 
 void Response::_generatePostResponse() {
 
 	if (!_isMethodAllowed() && (_request->getCgiScriptPathForRequest()).empty()) {
 		_allow = _getAllowHeader();
-		return _request->setStatusCode(405);
+		_request->setStatusCode(405);
 	}
 
 	std::string filename = _request->getAbsoluteRootPathForRequest();
@@ -781,15 +686,11 @@ void Response::_generatePostResponse() {
 	if (_isCgiExt()) {
 		_runCgi(filename);
 		_parseHeadersFromCgiResponse();
-		if (!_request->isStatusCodeOk())
-			return ;
 		if (_cgi_headers.count("content-length")) {
 			_cgi_response.resize(libft::strtoul_base(_cgi_headers["content-length"], 10));
 		}
 		_content.swap(_cgi_response);
 	}
-	if (!_request->isStatusCodeOk())
-		return ;
 
 	_generateStatusLine();
 	_generateHeaders();
@@ -807,6 +708,8 @@ void Response::generateResponse() {
 				_generateGetResponse();
 			} else if (_request->_method == "HEAD") {
 				_generateHeadResponse();
+			} else if (_request->_method == "PUT") {
+				_generatePutResponse();
 			} else if (_request->_method == "POST") {
 				_generatePostResponse();
 			} else {
@@ -899,19 +802,15 @@ std::string Response::_generateAutoindex(std::string dir_name)
 	response_body += _request->_request_target;
 	response_body +="</title>\n"
 					"</head>\n";
-
 	response_body += "<body>\n";
 	response_body += "<h1>Index of ";
 	response_body += _request->_request_target;
 	response_body += "</h1><hr>\n";
 	response_body += "<pre>\n";
 
-
 	response_body += "<a href=\"";
 	response_body += "../";
 	response_body += "\">../</a>\n";
-
-
 
 	std::list<std::map<std::string, std::list<std::string> > > info = _dir_opers(dir_name);
 	std::list<std::map<std::string, std::list<std::string> > >::iterator it = info.begin();

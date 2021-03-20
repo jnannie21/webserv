@@ -3,10 +3,9 @@
 //
 
 #ifndef WEBSERV_UTILS_H
-#define WEBSERV_UTILS_H
+# define WEBSERV_UTILS_H
 
 #include <string>
-
 
 namespace utils {
     void exitWithLog(void);

@@ -1,11 +1,9 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-class Request;
 #include <map>
 #include <set>
 #include <string>
-
 #include "WebServ.hpp"
 #include "Response.hpp"
 #include "config_parsing/Config.hpp"
@@ -14,15 +12,14 @@ class Request;
 
 
 class Request {
-
 	friend class Response;
 	friend class Listener;
 	friend class WebServ;
 
 public:
-	static std::set<std::string> initRequestHeaders();
-
 	static const std::set<std::string> implemented_headers;
+
+	static std::set<std::string> initRequestHeaders();
 
 private:
 	int _status_code;
@@ -44,7 +41,6 @@ private:
 	std::string _put_filename;
 
 	bool _header_has_been_read;
-//	bool _file_exists;
 	bool _is_need_writing_body_to_file;
 	std::string _cgi_script_path;
 	std::string _response_content_lang;
@@ -53,7 +49,6 @@ private:
 	std::string _host;
 	int _port;
 	std::size_t _lang_file_pos;
-
 
 public:
 	Request();
@@ -86,9 +81,9 @@ public:
 	void handleAcceptCharsetHeader(void);
 	void handleAcceptLanguageHeader();
 	bool isStatusCodeOk();
+	bool isStatusCodeError();
 	void checkForMaxBodySize(long body_size);
 	void writeBodyInFile();
-//	bool checkIfFileExists(void);
 	bool isRegFileExists(const std::string& full_filename);
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);

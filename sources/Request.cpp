@@ -6,7 +6,6 @@
 #include <set>
 #include "Request.hpp"
 
-
 Request::Request()
 		: _status_code(200),
 		  _raw_request(""),
@@ -39,10 +38,6 @@ Request::Request(struct sockaddr_in & remote_addr, int server_port)
 
 Request::~Request() {}
 
-/*
- * return true if METHOD IS NOT ALLOWED BY CONFIG
- * Author: Airat (GDrake)
- */
 bool Request::isMethodAllowed(const LocationContext& handling_location) {
 	const std::list<std::string> limit_except = (handling_location).getLimitExceptMethods();
 	if (limit_except.empty())
@@ -228,11 +223,11 @@ void Request::parseRequestLine() {
 
 	size_t request_line_length = _raw_request.find("\r\n");
 	if (request_line_length == std::string::npos)
-		return setStatusCode(400);
+		setStatusCode(400);
 	request_line = _raw_request.substr(0, request_line_length);
 	size_t word_end = request_line.find(' ');
 	if (word_end == std::string::npos)
-		return setStatusCode(400);
+		setStatusCode(400);
 	_method = request_line.substr(0, word_end);
 	request_line.erase(0, word_end + 1);
 
@@ -245,7 +240,7 @@ void Request::parseRequestLine() {
 
 	word_end = request_line.find(' ');
 	if (word_end == std::string::npos)
-		return setStatusCode(400);
+		setStatusCode(400);
 	if (there_is_query)
 		_query_string = request_line.substr(0, word_end);
 	else
@@ -253,18 +248,16 @@ void Request::parseRequestLine() {
 	request_line.erase(0, word_end + 1);
 
 	if (request_line.find(' ') != std::string::npos)
-		return setStatusCode(400);
+		setStatusCode(400);
 
 	_http_version = request_line;
 	_raw_request.erase(0, request_line_length + 2);
 
 	if (_method.length() + _request_target.length() + _http_version.length() + 4 > MAX_HEADER_LINE_LENGTH)
-		return setStatusCode(414); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
+		setStatusCode(414); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 }
 
 void Request::parseHeaders() {
-	if (!isStatusCodeOk())
-		return ;
 	std::string field_name;
 	std::string field_value;
 	size_t field_name_length;
@@ -274,19 +267,19 @@ void Request::parseHeaders() {
 	while (line_length != 0) {
 		if (line_length > MAX_HEADER_LINE_LENGTH
 			|| line_length == std::string::npos) {
-			return setStatusCode(400); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
+			setStatusCode(400); // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
 		}
 
 		field_name_length = _raw_request.find(':'); // field-name
 		if (field_name_length == std::string::npos) {
-			return setStatusCode(400);
+			setStatusCode(400);
 		}
 		field_name = _raw_request.substr(0, field_name_length);
 
 		libft::string_to_lower(field_name); // field_name is case-insensitive so we make it lowercase to make life easy
 
 		if (field_name.find(' ') != std::string::npos) { // no spaces inside field-name, rfc 3.2.4
-			return setStatusCode(400);
+			setStatusCode(400);
 		}
 		_raw_request.erase(0, field_name_length + 1);
 
@@ -304,10 +297,10 @@ void Request::parseHeaders() {
 		_raw_request.erase(0, field_value_length + 2);
 			if (_headers.count(field_name)) {
 				if (field_name == "host")
-					return setStatusCode(400);
+					setStatusCode(400);
 				if (field_name == "content-length") {
 					_close_connection = true; // rfc 7230 3.3.3
-					return setStatusCode(400);
+					setStatusCode(400);
 				}
 				_headers[field_name].append(",");
 			}
@@ -317,10 +310,10 @@ void Request::parseHeaders() {
 	}
 	_raw_request.erase(0, 2);
 	if (_headers.empty())
-		return setStatusCode(400);
+		setStatusCode(400);
 }
 
-void    Request::parsUri() {
+void Request::parsUri() {
 	std::string url = _request_target;
 	std::string res;
 	std::string tmp;
@@ -357,7 +350,7 @@ void    Request::parsUri() {
 					count += 3;
 					continue;
 				} else {
-					return setStatusCode(400);
+					setStatusCode(400);
 				}
 			}
 			tmp += url[count];
@@ -439,11 +432,9 @@ void Request::handleExpectHeader(void) {
         } else {
 			setStatusCode(100);
         }
-
     }
 }
 
-//// Accept-Charset and Accept-Language Headers Handlers BEGIN
 /*
  * https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Accept-Charset
  * https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Accept-Language
@@ -537,9 +528,6 @@ void Request::appendRequestTarget(std::string & filename, std::string &request_t
 	}
 }
 
-
-
-
 void Request::setStatusCodeNoExept(int status_code) { _status_code = status_code;}
 void Request::setHandlingServer(ServerContext* handling_server) { _handling_server = handling_server;}
 void Request::setHandlingLocation(LocationContext* location_to_route) { _handling_location = location_to_route;}
@@ -553,7 +541,9 @@ int                     Request::getStatusCode() { return _status_code;}
 const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
 const std::string&      Request::getCgiScriptPathForRequest(void) const { return _cgi_script_path;}
 
-bool Request::isStatusCodeOk() { return _status_code == 200; }
+bool Request::isStatusCodeOk() { return _status_code == 200 || _status_code == 201 || _status_code == 204; }
+
+bool Request::isStatusCodeError() { return _status_code >= 400; }
 
 void Request::checkForMaxBodySize(long body_size) {
 	long client_max_body_size;

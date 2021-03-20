@@ -5,10 +5,11 @@
 #ifndef WEBSERV_SERVER_HPP
 #define WEBSERV_SERVER_HPP
 
-class Server;
 #include <list>
 #include "config_parsing/ServerContext.hpp"
 #include "Listener.hpp"
+
+class Listener;
 
 class Server {
 public:
