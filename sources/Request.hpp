@@ -44,7 +44,7 @@ private:
 	std::string _put_filename;
 
 	bool _header_has_been_read;
-	bool _file_exists;
+//	bool _file_exists;
 	bool _is_need_writing_body_to_file;
 	std::string _cgi_script_path;
 	std::string _response_content_lang;
@@ -88,7 +88,7 @@ public:
 	bool isStatusCodeOk();
 	void checkForMaxBodySize(long body_size);
 	void writeBodyInFile();
-	bool checkIfFileExists(void);
+//	bool checkIfFileExists(void);
 	bool isRegFileExists(const std::string& full_filename);
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);

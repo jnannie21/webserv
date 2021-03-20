@@ -263,15 +263,19 @@ bool Listener::_readBody(Request * request, int socket) {
 		}
 
 		request->_put_filename = request->getAbsolutePathForPutRequests() + request->_request_target;
-		request->_file_exists = request->checkIfFileExists();
 
-		if (request->_file_exists)
-		{
-			if (!request->targetIsFile()) {
+		struct stat buffer;
+//		if (request->_put_file_exists)
+		bool file_exists = stat(request->_put_filename.c_str(), &buffer) == 0;
+		if (file_exists) {
+			if (!request->targetIsFile())
 				request->setStatusCode(409);
-			}
 		}
 		request->writeBodyInFile();
+		if (file_exists)
+			request->setStatusCode(204);
+		else
+			request->setStatusCode(201);
 	}
 
 	return body_was_read;

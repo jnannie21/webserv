@@ -85,12 +85,12 @@ std::map<int,std::string> Response::_initStatusCodes() {
 Response::Response() :
 		_request(), _socket(),
 		_raw_response(""), _content(""),
-		_in_progress(false), _sent_len(0), _error_code_for_generaion(200) { }
+		_in_progress(false), _sent_len(0) { }
 
 Response::Response(Request * request, int socket) :
 				_request(request), _socket(socket),
 				_raw_response(""), _content(""),
-				_in_progress(false), _sent_len(0), _error_code_for_generaion(200) { }
+				_in_progress(false), _sent_len(0) { }
 
 Response::~Response(void) { }
 
@@ -225,41 +225,40 @@ void Response::_generateHeaders() {
 	_raw_response += "\r\n";
 }
 
-void Response::_updateRequestForErrorPage(const std::string& error_page_link) {
-    _error_code_for_generaion = _request->getStatusCode();
+//void Response::_updateRequestForErrorPage(const std::string& error_page_link) {
+//    _error_code_for_generaion = _request->getStatusCode();
+//
+//    _request->setStatusCode(200);
+//    if (_request->_method != "HEAD") {
+//        _request->_method = "GET";
+//    }
+//    _request->_request_target = error_page_link;
+////    WebServ::routeRequest(_request->_host, _request->_port, _request, _request->_request_target);
+//}
 
-    _request->setStatusCode(200);
-    if (_request->_method != "HEAD") {
-        _request->_method = "GET";
-    }
-    _request->_request_target = error_page_link;
-    WebServ::routeRequest(_request->_host, _request->_port, _request, _request->_request_target);
+//void Response::_generateResponseForErrorPage(void) {
+//    _generateHeadResponseCore();
+//
+//    if (_request->getStatusCode() == _error_code_for_generaion) {
+//        return _generateDefaultResponseByStatusCode();
+//    }
+//    _request->setStatusCodeNoExept(_error_code_for_generaion);
+//    _error_code_for_generaion = 200;
+//
+//    _generateStatusLine();
+//
+//	if (_request->getStatusCode() == 401) {
+//		_www_authenticate = _getWwwAuthenticateHeader();
+//	}
+//
+//    _generateHeaders();
+//    if (_request->_method != "PUT") {
+//        _raw_response += _content;
+//    }
+//}
 
-}
-
-void Response::_generateResponseForErrorPage(void) {
-    _generateHeadResponseCore();
-
-    if (_request->getStatusCode() == _error_code_for_generaion) {
-        return _generateDefaultResponseByStatusCode();
-    }
-    _request->setStatusCodeNoExept(_error_code_for_generaion);
-    _error_code_for_generaion = 200;
-
-    _generateStatusLine();
-
-	if (_request->getStatusCode() == 401) {
-		_www_authenticate = _getWwwAuthenticateHeader();
-	}
-
-    _generateHeaders();
-    if (_request->_method != "PUT") {
-        _raw_response += _content;
-    }
-}
-
-const std::string Response::_searchForErrorPageLinkAndSetChangeError(void) const {
-    AContext * context = (_request->_handling_location != NULL)?
+const std::string Response::_getErrorPagePath(void) const {
+    AContext * context = (_request->_handling_location != NULL) ?
                          static_cast<AContext*>(_request->_handling_location) :
                          static_cast<AContext*> (_request->_handling_server);
 
@@ -267,8 +266,7 @@ const std::string Response::_searchForErrorPageLinkAndSetChangeError(void) const
     {
         const std::map<int, std::map<std::string, std::string> > &error_page_info = context->getErrorPagesDirectiveInfo();
 
-        std::map<int, std::map<std::string, std::string> >::const_iterator it_search = error_page_info.find(
-                _request->getStatusCode());
+        std::map<int, std::map<std::string, std::string> >::const_iterator it_search = error_page_info.find(_request->getStatusCode());
 
         if (it_search != error_page_info.end()) {
             const std::map<std::string, std::string> &params_map = (it_search->second);
@@ -296,10 +294,73 @@ const std::string Response::_searchForErrorPageLinkAndSetChangeError(void) const
     return "";
 }
 
-void Response::_generateDefaultResponseByStatusCode() {
-    _content_type = "Content-Type: text/html;charset=utf-8\r\n";
-    if (_request->_method != "HEAD" && _request->_method != "PUT")
-        _content.append(libft::ultostr_base(_request->getStatusCode(), 10)).append(" ").append(Response::status_codes[_request->getStatusCode()]).append("\r\n");
+void Response::_readErrorPage(std::string & error_page) {
+	int fd;
+	std::string content;
+	struct stat stat_buf;
+	size_t ret;
+	std::string filename = _request->getAbsoluteRootPathForRequest();
+	_request->appendRequestTarget(filename, error_page);
+	if (stat(filename.c_str(), &stat_buf) == 0 && S_ISREG(stat_buf.st_mode)) {
+		if ((fd = open(filename.c_str(), O_RDONLY, S_IRWXU)) == -1)
+			return ;
+		std::vector<char> buf;
+		buf.reserve(stat_buf.st_size);
+		if ((ret = read(fd, &buf[0], stat_buf.st_size)) >= 0) {
+			_content.append(&buf[0], ret);
+		}
+	}
+}
+
+//void Response::_generateDefaultResponseByStatusCode() {
+//    _content_type = "Content-Type: text/html;charset=utf-8\r\n";
+//    if (_request->_method != "HEAD" && _request->_method != "PUT")
+//        _content.append(libft::ultostr_base(_request->getStatusCode(), 10)).append(" ").append(Response::status_codes[_request->getStatusCode()]).append("\r\n");
+//
+//    _generateStatusLine();
+//
+//    if (_request->getStatusCode() == 401) {
+//        _www_authenticate = _getWwwAuthenticateHeader();
+//    }
+//
+//    if (_request->getStatusCode() != 100) { // cURL dont recognize 100 status code response with headers
+//        _generateHeaders();
+//        _raw_response.append(_content);
+//    }
+//
+//}
+
+void Response::_generateResponseByStatusCode() {
+//    try
+//    {
+//
+//        std::string link = _searchForErrorPageLinkAndSetChangeError();
+////        _content = "";
+//        if (link.size()) {
+////            _updateRequestForErrorPage(link);
+////            _generateResponseForErrorPage();
+//        }
+//        else
+//        {
+//            _generateDefaultResponseByStatusCode();
+//        }
+//    }
+//    catch (WebServ::NotOKStatusCodeException &e)
+//    {
+//        _generateDefaultResponseByStatusCode();
+//    }
+
+	if (_request->_method == "PUT")
+		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
+
+	_content_type = "Content-Type: text/html;charset=utf-8\r\n";
+    if (_request->_method != "HEAD" && _request->_method != "PUT") {
+		std::string error_page = _getErrorPagePath();
+    	if (error_page.size())
+    		_readErrorPage(error_page);
+		if (_content.size() == 0)
+			_content.append(libft::ultostr_base(_request->getStatusCode(), 10)).append(" ").append(Response::status_codes[_request->getStatusCode()]).append("\r\n");
+    }
 
     _generateStatusLine();
 
@@ -310,28 +371,6 @@ void Response::_generateDefaultResponseByStatusCode() {
     if (_request->getStatusCode() != 100) { // cURL dont recognize 100 status code response with headers
         _generateHeaders();
         _raw_response.append(_content);
-    }
-
-}
-
-void Response::_generateResponseByStatusCode() {
-
-    try
-    {
-        std::string link = _searchForErrorPageLinkAndSetChangeError();
-        _content = "";
-        if (link.size()) {
-            _updateRequestForErrorPage(link);
-            _generateResponseForErrorPage();
-        }
-        else
-        {
-            _generateDefaultResponseByStatusCode();
-        }
-    }
-    catch (WebServ::NotOKStatusCodeException &e)
-    {
-        _generateDefaultResponseByStatusCode();
     }
 }
 
@@ -435,7 +474,6 @@ std::string Response::_getUserFromCredentials() {
 	return user;
 }
 
-
 void Response::_setEnv(std::vector<char *> & env, std::string & filename, std::map<std::string, std::string> & cgiVariables) {
 	cgiVariables["AUTH_TYPE"] = "AUTH_TYPE=" + _request->_headers["authorization"].substr(0, _request->_headers["authorization"].find(' '));
 	cgiVariables["CONTENT_LENGTH"] = "CONTENT_LENGTH=" + _request->_headers["content-length"];
@@ -531,7 +569,6 @@ void Response::_runCgi(std::string & filename) { // filename is a *.php script
 		exit_status = WEXITSTATUS(exit_status);
 	else if (WIFSIGNALED(exit_status))
 		exit_status = exit_status | 128;
-
 
 	if (exit_status == 0) {
 		struct stat stat_buf;
@@ -688,7 +725,7 @@ void Response::_generateHeadResponseCore() {
 					_request->_request_target += '/';
 				_request->_request_target += matching_index;
 
-				_location = _getLocationHeader(false); // TODO: need checks. ,aybe it is file location
+				_location = _getLocationHeader(false);
 
                 _retry_after = _getRetryAfterHeader();
                 return _request->setStatusCode(301); //Moved Permanently
@@ -700,7 +737,7 @@ void Response::_generateHeadResponseCore() {
                 return _request->setStatusCode(403);
             }
         } else {
-            return _request->setStatusCode(403); // TODO:check what code to return if file is not a directory and not a regular file
+            return _request->setStatusCode(403);
         }
     } else {
         return _request->setStatusCode(404);
@@ -717,18 +754,18 @@ void Response::_generateHeadResponse() {
 	_generateHeaders();
 }
 
-void Response::_generatePutResponse() {
-    if (_request->_file_exists) {
-		_request->setStatusCode(204);
-    } else {
-		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
-		_request->setStatusCode(201);
-    }
-
-    _generateStatusLine();
-    _generateHeaders();
-    _raw_response += _content;
-}
+//void Response::_generatePutResponse() {
+//    if (_request->_file_exists) {
+//		_request->setStatusCode(204);
+//    } else {
+//		_content_location = "Content-Location: " + _request->_request_target + "\r\n";
+//		_request->setStatusCode(201);
+//    }
+//
+//    _generateStatusLine();
+//    _generateHeaders();
+//    _raw_response += _content;
+//}
 
 void Response::_generatePostResponse() {
 
@@ -737,7 +774,6 @@ void Response::_generatePostResponse() {
 		return _request->setStatusCode(405);
 	}
 
-//TODO: need to figure out what path to use instead of root. [Airat comment]: same as previous
 	std::string filename = _request->getAbsoluteRootPathForRequest();
 	_request->appendRequestTarget(filename, _request->_request_target);
 
@@ -771,8 +807,6 @@ void Response::generateResponse() {
 				_generateGetResponse();
 			} else if (_request->_method == "HEAD") {
 				_generateHeadResponse();
-			} else if (_request->_method == "PUT") {
-				_generatePutResponse();
 			} else if (_request->_method == "POST") {
 				_generatePostResponse();
 			} else {
@@ -842,15 +876,13 @@ std::string Response::_replaceQuoteToCode(const std::string& str) {
 	return copy;
 }
 
-bool isUtf_8(char c)
-{
+bool Response::_isUtf_8(char c) {
 	return (c & 0xC0) == 0x80;
 }
 
 // https://stackoverflow.com/questions/31652407/how-to-get-the-accurate-length-of-a-stdstring
-std::size_t Response::_getCharsLen(const std::string& str)
-{
-	return (str.length() - count_if(str.begin(), str.end(), isUtf_8));
+std::size_t Response::_getCharsLen(const std::string& str) {
+	return (str.length() - count_if(str.begin(), str.end(), _isUtf_8));
 }
 
 std::string Response::_generateAutoindex(std::string dir_name)

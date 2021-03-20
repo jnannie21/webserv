@@ -579,13 +579,6 @@ void Request::writeBodyInFile() {
 	close(file);
 }
 
-
-bool Request::checkIfFileExists(void) {
-	struct stat buffer;
-	return (stat (_put_filename.c_str(), &buffer) == 0);
-}
-
-
 bool Request::isRegFileExists(const std::string& full_filename) {
 	struct stat buffer;
 	return ((stat (full_filename.c_str(), &buffer) == 0) && S_ISREG(buffer.st_mode));

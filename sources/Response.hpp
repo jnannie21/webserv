@@ -30,7 +30,7 @@ private:
 	void _generateGetResponse();
 	void _generateHeadResponseCore();
 	void _generateHeadResponse();
-	void _generatePutResponse();
+//	void _generatePutResponse();
 	void _generatePostResponse();
 	void _generateResponseByStatusCode();
 	void _generateStatusLine();
@@ -39,10 +39,11 @@ private:
 	std::string _generateAutoindex(std::string dir_name);
 	void _setContentTypeByFileExt(std::string & ext);
 	bool _isMethodAllowed();
-	void _updateRequestForErrorPage(const std::string& error_page_link);
-	void _generateDefaultResponseByStatusCode();
-	void _generateResponseForErrorPage(void);
-	const std::string _searchForErrorPageLinkAndSetChangeError() const;
+//	void _updateRequestForErrorPage(const std::string& error_page_link);
+//	void _generateDefaultResponseByStatusCode();
+//	void _generateResponseForErrorPage(void);
+	const std::string _getErrorPagePath() const;
+	void _readErrorPage(std::string & error_page);
 	void _checkForAcceptPrefixHeaders(void);
 	std::string _getDateHeader();
 	std::string _getLastModifiedHeader(time_t tv_sec);
@@ -64,7 +65,7 @@ private:
 	std::list<std::map<std::string, std::list<std::string> > > _dir_opers(const std::string& dir_name);
 	std::string _replaceQuoteToCode(const std::string& str);
 	std::size_t _getCharsLen(const std::string& str);
-
+	static bool _isUtf_8(char c);
 
 public:
 	static std::set<std::string> implemented_headers;
@@ -91,7 +92,7 @@ private:
 	bool _in_progress;
 	long _remains;
 	long _sent_len;
-	int _error_code_for_generaion;
+//	int _error_code_for_generaion;
 
 };
 
