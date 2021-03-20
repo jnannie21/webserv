@@ -105,16 +105,11 @@ void Listener::_closeSocket(std::list<int>::iterator & it) {
 	_client_response.erase(*it);
 }
 
-// return TRUE if header was read else FALSE
-bool Listener::_checkIfHeaderHasBeenRead(Request* request) {
+bool Listener::_checkIfHeadersHasBeenRead(Request* request) {
     const std::string& raw_request = request->getRawRequest();
 
     std::size_t headers_end = raw_request.find("\r\n\r\n");
     if (std::string::npos != headers_end) {
-//		request->_body_bytes_read += (raw_request.size() - headers_end - 4);
-//        if (request->_bytes_read > (headers_end + 4)) {
-//			request->_body_bytes_read += (request->_bytes_read - (headers_end + 4));
-//        }
         return true;
     }
     return false;
@@ -226,8 +221,6 @@ bool    find_log_pass(std::vector<std::string> log_pass, std::string const& cred
 void Listener::_processHeaders(int client_socket) {
     Request * request = &_client_requests[client_socket];
 
-//    std::cout << request->_raw_request.substr(0, 200) << std::endl;
-
     request->parseRequestLine();
     request->parseHeaders();
     request->parsUri();
@@ -241,7 +234,7 @@ void Listener::_processHeaders(int client_socket) {
     }
 
     if (request->_handling_location) {
-		if (request->_handling_location->getAuthEnable()) { // TODO: add to config file
+		if (request->_handling_location->getAuthEnable()) {
 			if (request->_headers.count("authorization")) {
 				std::vector<std::string> log_pass = parser_log_pass(std::string("passwd"), request);
 				std::string auth_scheme = request->_headers["authorization"].substr(0, 5);
@@ -257,41 +250,31 @@ void Listener::_processHeaders(int client_socket) {
 		}
     }
 
-    if (request->_method == "PUT") {
-        // https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
-        if (request->_headers.count("content-range")) {
-            request->setStatusCode(400);
-        }
-
-        request->_put_filename = request->getAbsolutePathForPutRequests() + request->_request_target;
-
-		request->_file_exists = request->checkIfFileExists();
-        request->setNeedWritingBodyToFile(true);
-
-        if (request->_file_exists)
-        {
-            if (!request->targetIsFile()) {
-                    request->setStatusCode(409);
-            }
-        }
-    }
-
 	request->handleExpectHeader();
 }
 
 bool Listener::_readBody(Request * request, int socket) {
 	bool body_was_read = _continueReadBody(&_client_requests[socket]);
-	bool writing_to_file_result = true;
 
-	if (request->getNeedWritingBodyToFile() && body_was_read) {
-		request->writeBodyReadBytesIntoFile();
+	if (body_was_read && request->_method == "PUT") {
+		// https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
+		if (request->_headers.count("content-range")) {
+			request->setStatusCode(400);
+		}
+
+		request->_put_filename = request->getAbsolutePathForPutRequests() + request->_request_target;
+		request->_file_exists = request->checkIfFileExists();
+
+		if (request->_file_exists)
+		{
+			if (!request->targetIsFile()) {
+				request->setStatusCode(409);
+			}
+		}
+		request->writeBodyInFile();
 	}
 
-	if (body_was_read || !writing_to_file_result) {
-		return true;
-	} else {
-		return false;
-	}
+	return body_was_read;
 }
 
 void Listener::_handleRequests(fd_set* globalReadSetPtr) {
@@ -302,7 +285,7 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
 	while (it != _clients_read.end() ) {
         try {
             try {
-                if (FD_ISSET(*it, globalReadSetPtr)) { // Поступили данные от клиента, читаем их
+                if (FD_ISSET(*it, globalReadSetPtr)) {
                     Request *request = &_client_requests[*it];
                     request->setHostAndPort(_host, _port);
 
@@ -318,7 +301,7 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
 					request->getRawRequest().append(_buf, bytes_read);
 
 					if (!request->_header_has_been_read) {
-                        request->_header_has_been_read = _checkIfHeaderHasBeenRead(request);
+                        request->_header_has_been_read = _checkIfHeadersHasBeenRead(request);
                         if (request->_header_has_been_read) {
 							_processHeaders(*it);
 							if (_readBody(request, *it)) {
@@ -329,7 +312,6 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
                         } else // jnannie: we can read and write only once according to checklist
                             ++it;
                     } else {
-//						request->_body_bytes_read += bytes_read;
 						if (_readBody(request, *it)) {
 							_clients_write.push_back(*it);
 							it = _clients_read.erase(it);

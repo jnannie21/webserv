@@ -200,7 +200,6 @@ std::string Response::_getWwwAuthenticateHeader() {
 std::string Response::_getRetryAfterHeader() {
     std::string retryAfter = ("Retry-After: " + std::string(RETRY_AFTER_SECOND_DELAY) + "\r\n");
     return retryAfter;
-
 }
 
 void Response::_generateHeaders() {
@@ -239,11 +238,8 @@ void Response::_updateRequestForErrorPage(const std::string& error_page_link) {
 }
 
 void Response::_generateResponseForErrorPage(void) {
-
-
     _generateHeadResponseCore();
 
-    // check for the same error
     if (_request->getStatusCode() == _error_code_for_generaion) {
         return _generateDefaultResponseByStatusCode();
     }
@@ -300,7 +296,6 @@ const std::string Response::_searchForErrorPageLinkAndSetChangeError(void) const
     return "";
 }
 
-
 void Response::_generateDefaultResponseByStatusCode() {
     _content_type = "Content-Type: text/html;charset=utf-8\r\n";
     if (_request->_method != "HEAD" && _request->_method != "PUT")
@@ -354,12 +349,10 @@ void Response::_readFileToContent(std::string & filename) {
 	while ((ret = read(fd, buf, 1024))) {
 		if (ret < 0)
 			return _request->setStatusCode(500);
-//			utils::exitWithLog();
 		_content.append(buf, ret);
 	}
 	close(fd);
 }
-
 
 void Response::_setContentTypeByFileExt(std::string & ext) {
 	if (ext == "")
@@ -376,23 +369,6 @@ void Response::_setContentTypeByFileExt(std::string & ext) {
 	}
 }
 
-
-/*
- * TODO: case1:
- *         location /html/ {
- *           index index.html;
- *           limit_except PUT;
- *        }
- *        _request->_handling_location is NULL somehow
- *        doesnt work index directive
- *
- * TODO: case2:
- *    location / {
- *    limit_except PUT;
- *    }
- *    doesnt work for files in subfolders
- *
- */
 bool Response::_isMethodAllowed() {
 	if (!_request->_handling_location)
 		return true;
@@ -500,7 +476,6 @@ void Response::_setEnv(std::vector<char *> & env, std::string & filename, std::m
 		i++;
 	}
 	env.push_back(NULL);
-	//all elements of env are initialized to NULL
 }
 
 
@@ -659,7 +634,6 @@ void Response::_generateHeadResponseCore() {
         return _request->setStatusCode(405);
     }
 
-//TODO: need to figure out what path to use instead of root. [Airat comment] if work, dont touch:D
     std::string filename = _request->getAbsoluteRootPathForRequest();
 	_request->appendRequestTarget(filename, _request->_request_target);
 
@@ -758,7 +732,6 @@ void Response::_generatePutResponse() {
 
 void Response::_generatePostResponse() {
 
-//    std::cout << "CGI SCRIPT: " << _request->getCgiScriptPathForRequest() << std::endl;
 	if (!_isMethodAllowed() && (_request->getCgiScriptPathForRequest()).empty()) {
 		_allow = _getAllowHeader();
 		return _request->setStatusCode(405);
@@ -786,29 +759,25 @@ void Response::_generatePostResponse() {
 	_generateHeaders();
 
 	_raw_response += _content;
-
 }
 
 void Response::generateResponse() {
 	if (_request->isStatusCodeOk()) {
 	    try
         {
-//            _request->checkClientMaxBodySize(_request->_content.size()); // 413 set inside if needed
             _checkForAcceptPrefixHeaders();
 
-//            if (_request->isStatusCodeOk()) {
-                if (_request->_method == "GET") {
-                    _generateGetResponse();
-                } else if (_request->_method == "HEAD") {
-                    _generateHeadResponse();
-                } else if (_request->_method == "PUT") {
-                    _generatePutResponse();
-                } else if (_request->_method == "POST") {
-                    _generatePostResponse();
-                } else {
-                    _request->setStatusCode(501); // 501 Not Implemented
-                }
-//            }
+			if (_request->_method == "GET") {
+				_generateGetResponse();
+			} else if (_request->_method == "HEAD") {
+				_generateHeadResponse();
+			} else if (_request->_method == "PUT") {
+				_generatePutResponse();
+			} else if (_request->_method == "POST") {
+				_generatePostResponse();
+			} else {
+				_request->setStatusCode(501); // 501 Not Implemented
+			}
         }
 	    catch (WebServ::NotOKStatusCodeException& e) {}
 	}
@@ -839,11 +808,7 @@ void Response::sendResponse() {
 			_request->_close_connection = true;
 			_in_progress = false;
 		}
-
-//		std::cout << _raw_response.substr(0, 200) << std::endl; // skarry
-
 }
-
 
 void Response::_checkForAcceptPrefixHeaders(void) {
     if (_request->_headers.count("accept-charset")) {
@@ -851,14 +816,7 @@ void Response::_checkForAcceptPrefixHeaders(void) {
     }
 
 	_request->handleAcceptLanguageHeader();
-
-//    if (_request->_headers.count("accept-language")) {
-//        _request->handleAcceptLanguageHeader(true);
-//    } else {
-//        _request->handleAcceptLanguageHeader(false);
-//    }
 }
-
 
 void Response::setRemains() {
 	_remains = _raw_response.size();
@@ -872,7 +830,6 @@ std::string & Response::getContent() {
 	return _content;
 }
 
-
 std::string Response::_replaceQuoteToCode(const std::string& str) {
 	std::string copy = str;
 	std::string::iterator it = copy.begin();
@@ -884,7 +841,6 @@ std::string Response::_replaceQuoteToCode(const std::string& str) {
 	}
 	return copy;
 }
-
 
 bool isUtf_8(char c)
 {
@@ -977,13 +933,6 @@ std::string Response::_generateAutoindex(std::string dir_name)
 	return response_body;
 }
 
-//void Response::_exit()
-//{
-//	std::cout << strerror(errno)  << std::endl;
-//	exit(errno);
-//}
-
-
 std::list<std::map<std::string, std::list<std::string> > > Response::_dir_opers(const std::string& dir_name)
 {
 	DIR* dir_stream;
@@ -991,7 +940,6 @@ std::list<std::map<std::string, std::list<std::string> > > Response::_dir_opers(
 
 	if (!dir_stream)
 		_request->setStatusCode(500);
-//        ft_exit();
 	struct dirent *info;
 
 	std::map<std::string, std::list<std::string> > files;
@@ -1008,8 +956,6 @@ std::list<std::map<std::string, std::list<std::string> > > Response::_dir_opers(
 
 		if (stat(file_full_path.c_str(), &info_buf) == -1) {
 			_request->setStatusCode(500);
-//			std::cout << strerror(errno) << std::endl;
-//			exit(errno);
 		}
 
 		int file_type = info_buf.st_mode & S_IFMT;
@@ -1021,10 +967,6 @@ std::list<std::map<std::string, std::list<std::string> > > Response::_dir_opers(
 
 		std::list<std::string> date_modified_and_size_in_bytes;
 
-
-		// get modify time info
-//		long corrected_to_GMT = info_buf.st_mtime + WebServ::getCorrectionMinutesToGMT()*60;
-//		std::string modified_seconds_to_str = libft::ultostr_base(corrected_to_GMT, 10);
 		std::string modified_seconds_to_str = libft::ultostr_base(info_buf.st_mtime, 10);
 		struct tm modified_time;
 		char *null_if_error = strptime(modified_seconds_to_str.c_str(), "%s", &modified_time);

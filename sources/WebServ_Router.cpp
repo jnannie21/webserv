@@ -105,8 +105,6 @@ std::list<ServerContext*> WebServ::getAllAsteriskHostPortComboList(const int por
     return to_return;
 }
 
-
-
 ServerContext* WebServ::findServerForHandlingRequest(const std::string& host,
                                                                 const int port,
                                                                 const std::string& server_name) {

@@ -18,11 +18,9 @@ Request::Request()
 		  _is_alias_path(false),
 		  _body_bytes_read(0),
 		  _header_has_been_read(false),
-		  _is_need_writing_body_to_file(false),
 		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		  _is_chunked(false),
 		  _lang_file_pos(0) {}
-//		  _sum_content_length(0) {}
 
 Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		:  _status_code(200),
@@ -35,11 +33,9 @@ Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		   _is_alias_path(false),
 		   _body_bytes_read(0),
 		   _header_has_been_read(false),
-		   _is_need_writing_body_to_file(false),
 		   _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		   _is_chunked(false),
 		   _lang_file_pos(0) {}
-//		   _sum_content_length(0) {}
 
 Request::~Request() {}
 
@@ -151,18 +147,7 @@ Pair<std::string, float> parseValueAndQuality(std::string str) {
     return Pair<std::string, float>(str.substr(0, q_pos), quality);
 }
 
-//const std::list<int> Request::OK_STATUS_CODES = Request::initOkStatusCodes();
 const std::set<std::string> Request::implemented_headers = Request::initRequestHeaders();
-
-//std::list<int> Request::initOkStatusCodes(void) {
-//    std::list<int> codes;
-//
-//    codes.push_back(200);
-//    codes.push_back(204);
-//    codes.push_back(201);
-//    codes.push_back(100);
-//    return codes;
-//}
 
 std::set<std::string> Request::initRequestHeaders() {
 	std::set<std::string> implemented_headers;
@@ -179,7 +164,7 @@ std::set<std::string> Request::initRequestHeaders() {
 	implemented_headers.insert("referer"); // Referer: http://en.wikipedia.org/wiki/Main_Page
 	implemented_headers.insert("transfer-encoding"); // Transfer-Encoding: gzip, chunked
     implemented_headers.insert("user-agent"); // User-Agent: Mozilla/5.0 (X11; Linux i686; rv:2.0.1) Gecko/20100101 Firefox/4.0.1
-    // for requests with PUT method
+    // for PUT method
     implemented_headers.insert("expect"); // Expect: 100-continue
     implemented_headers.insert("content-range"); // https://efim360.ru/rfc-7231-protokol-peredachi-giperteksta-http-1-1-semantika-i-kontent/#4-3-4-PUT
 	return implemented_headers;
@@ -361,7 +346,7 @@ void    Request::parsUri() {
 			}
 			count += 2;
 		}
-		while (count < lenght && url[count] != '/') { //args write
+		while (count < lenght && url[count] != '/') {
 			if (url[count] == '%') {
 				char ch;
 				std::string hex_str = url.substr(count + 1, 2);
@@ -378,13 +363,13 @@ void    Request::parsUri() {
 			tmp += url[count];
 			++count;
 		}
-		if (!tmp.empty()) { // args add
+		if (!tmp.empty()) {
 			path.push_back(tmp);
 			tmp.clear();
 		}
 	}
 	it = path.begin();
-	while (it != path.end()) { // uri constructor
+	while (it != path.end()) {
 		res += '/';
 		res += *it;
 		++it;
@@ -394,7 +379,7 @@ void    Request::parsUri() {
 		_request_target = '/';
 	else {
 		_request_target = res;
-		if (url.size() && url[url.size() - 1] == '/')// jnannie: if there is '/' in the end of the uri we should save it, because when directory has not '/' we will response with "location" header as nginx does
+		if (url.size() && url[url.size() - 1] == '/')
 			_request_target += '/';
 	}
 }
@@ -409,7 +394,7 @@ std::list<std::string> Request::parseAndSortAcceptPrefixHeadersByQuality(std::st
         with_quality.push_back(parseValueAndQuality(value.substr(0, pos)));
 
         if (pos != std::string::npos)
-            pos++; // for comma delete
+            pos++;
         value.erase(0, pos);
 
         while(libft::isspace(value[0])) {
@@ -457,8 +442,6 @@ void Request::handleExpectHeader(void) {
 
     }
 }
-
-
 
 //// Accept-Charset and Accept-Language Headers Handlers BEGIN
 /*
@@ -560,8 +543,6 @@ void Request::appendRequestTarget(std::string & filename, std::string &request_t
 void Request::setStatusCodeNoExept(int status_code) { _status_code = status_code;}
 void Request::setHandlingServer(ServerContext* handling_server) { _handling_server = handling_server;}
 void Request::setHandlingLocation(LocationContext* location_to_route) { _handling_location = location_to_route;}
-//void Request::setFileExistenceStatus(bool value) { _is_file_exists = value;}
-void Request::setNeedWritingBodyToFile(bool value) { _is_need_writing_body_to_file = value;}
 void Request::setCgiScriptPathForRequest(const std::string& path) { _cgi_script_path = path;}
 void Request::setHostAndPort(const std::string& host, const int port) { _host = host;  _port = port;}
 void Request::setReponseContentLang(const std::string& lang) { _response_content_lang = lang;}
@@ -569,20 +550,10 @@ void Request::setReponseContentLang(const std::string& lang) { _response_content
 std::string &           Request::getRawRequest(void) { return this->_raw_request;}
 const std::string&      Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
 int                     Request::getStatusCode() { return _status_code;}
-bool                    Request::getNeedWritingBodyToFile(void) const { return _is_need_writing_body_to_file;}
 const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
 const std::string&      Request::getCgiScriptPathForRequest(void) const { return _cgi_script_path;}
 
-
-bool Request::isStatusCodeOk() {
-//	std::list<int>::const_iterator found = std::find(OK_STATUS_CODES.begin(), OK_STATUS_CODES.end(), _status_code);
-//
-//	if (found == OK_STATUS_CODES.end()) {
-//		return false;
-//	}
-//	return true;
-	return _status_code == 200;
-}
+bool Request::isStatusCodeOk() { return _status_code == 200; }
 
 void Request::checkForMaxBodySize(long body_size) {
 	long client_max_body_size;
@@ -597,7 +568,7 @@ void Request::checkForMaxBodySize(long body_size) {
 	}
 }
 
-void Request::writeBodyReadBytesIntoFile() {
+void Request::writeBodyInFile() {
 	int file = open(_put_filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0666);
 	if (file <= 0) {
 		setStatusCode(500);
@@ -630,7 +601,7 @@ bool Request::targetIsFile(void) {
 
 	int file_type = info_buf.st_mode & S_IFMT;
 
-	if (file_type == S_IFREG) // return true if it's file
+	if (file_type == S_IFREG)
 		return true;
 	return false;
 }

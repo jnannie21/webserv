@@ -30,7 +30,7 @@ private:
 	void _handleResponses(fd_set* globalWriteSetPtr);
     void _closeSocket(std::list<int>::iterator & it);
 	long _get_time();
-	bool _checkIfHeaderHasBeenRead(Request* request);
+	bool _checkIfHeadersHasBeenRead(Request* request);
     bool _continueReadBody(Request* request);
     void _processHeaders(int client_socket);
 	bool _readBody(Request * request, int socket);
