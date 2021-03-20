@@ -10,8 +10,6 @@
 #include "Base64.hpp"
 #include <sys/time.h>
 
-extern bool g_sigpipe;
-
 std::set<std::string> Response::implemented_headers = Response::_initResponseHeaders();
 
 std::map<int, std::string> Response::status_codes = Response::_initStatusCodes();
