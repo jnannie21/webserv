@@ -22,6 +22,7 @@ Request::Request()
 		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		  _is_chunked(false),
 		  _lang_file_pos(0) {}
+//		  _sum_content_length(0) {}
 
 Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		:  _status_code(200),
@@ -38,6 +39,7 @@ Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		   _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		   _is_chunked(false),
 		   _lang_file_pos(0) {}
+//		   _sum_content_length(0) {}
 
 Request::~Request() {}
 
@@ -45,7 +47,7 @@ Request::~Request() {}
  * return true if METHOD IS NOT ALLOWED BY CONFIG
  * Author: Airat (GDrake)
  */
-bool Request::isMethodLimited(const LocationContext& handling_location) {
+bool Request::isMethodAllowed(const LocationContext& handling_location) {
 	const std::list<std::string> limit_except = (handling_location).getLimitExceptMethods();
 	if (limit_except.empty())
 		return false;

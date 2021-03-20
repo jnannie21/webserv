@@ -823,12 +823,13 @@ void Response::sendResponse() {
 
 	long ret = 0;
 		ret = send(_socket, _raw_response.c_str() + _sent_len, _remains, 0);
-//		std::cout << _raw_response.substr(0,200) << std::endl;
+
 		if (ret >= 0) {
 			_sent_len += ret;
 			_remains -= ret;
 			if (_remains == 0) {
 				++i;
+				std::cout << _raw_response.substr(0,200) << std::endl;
 				std::cout << "response " << i << " is sent" << std::endl;
 				_in_progress = false;
 			} else {

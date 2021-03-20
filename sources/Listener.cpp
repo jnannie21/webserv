@@ -111,7 +111,7 @@ bool Listener::_checkIfHeaderHasBeenRead(Request* request) {
 
     std::size_t headers_end = raw_request.find("\r\n\r\n");
     if (std::string::npos != headers_end) {
-		request->_body_bytes_read += (raw_request.size() - headers_end - 4);
+//		request->_body_bytes_read += (raw_request.size() - headers_end - 4);
 //        if (request->_bytes_read > (headers_end + 4)) {
 //			request->_body_bytes_read += (request->_bytes_read - (headers_end + 4));
 //        }
@@ -135,7 +135,6 @@ bool Listener::_continueReadBody(Request* request) {
 		std::string start_line;
 		std::string chunk_length_field;
 		size_t chunk_length;
-		size_t sum_content_length = 0;
 
         while (!body.empty()) { // jnannie: remade like Request::parseChunkedContent()
 
@@ -153,20 +152,21 @@ bool Listener::_continueReadBody(Request* request) {
 				request->setStatusCode(400);
 			}
 			chunk_length = libft::strtoul_base(chunk_length_field, 16);
-			if (chunk_length == ULONG_MAX || chunk_length > ULONG_MAX - sum_content_length) {
+			if (chunk_length == ULONG_MAX || chunk_length > ULONG_MAX - request->_body_bytes_read) {
 				request->setStatusCode(413);// 413 (Request Entity Too Large)
 			}
 			if (body.size() < start_line_length + 2 + chunk_length + 2)
 				return false;
 
-			sum_content_length += chunk_length;
-			request->checkForMaxBodySize(sum_content_length);
+			request->_body_bytes_read += chunk_length;
 
 			body.erase(0, start_line_length + 2); // remove start line
 			request->_content.append(request->_raw_request.substr(0, chunk_length));
 			body.erase(0, chunk_length + 2); // remove rest of chunk
-			if (chunk_length == 0)
-			    return true;
+			if (chunk_length == 0) {
+				request->checkForMaxBodySize(request->_body_bytes_read);
+				return true;
+			}
 
 			start_line_length = body.find("\r\n");
         }
@@ -178,7 +178,7 @@ bool Listener::_continueReadBody(Request* request) {
 
         request->checkForMaxBodySize(content_length);
 
-		if (request->_body_bytes_read == content_length) {
+		if (request->_raw_request.size() >= content_length) {
 			request->_content.append(body, 0, content_length);
 			body.clear();
 			return true;
@@ -225,6 +225,8 @@ bool    find_log_pass(std::vector<std::string> log_pass, std::string const& cred
 
 void Listener::_processHeaders(int client_socket) {
     Request * request = &_client_requests[client_socket];
+
+//    std::cout << request->_raw_request.substr(0, 200) << std::endl;
 
     request->parseRequestLine();
     request->parseHeaders();
@@ -315,10 +317,7 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
 
 					request->getRawRequest().append(_buf, bytes_read);
 
-//					bool is_put = request->_method == "PUT";
-//					(void)is_put;
-
-                    if (!request->_header_has_been_read) {
+					if (!request->_header_has_been_read) {
                         request->_header_has_been_read = _checkIfHeaderHasBeenRead(request);
                         if (request->_header_has_been_read) {
 							_processHeaders(*it);
@@ -330,7 +329,7 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
                         } else // jnannie: we can read and write only once according to checklist
                             ++it;
                     } else {
-						request->_body_bytes_read += bytes_read;
+//						request->_body_bytes_read += bytes_read;
 						if (_readBody(request, *it)) {
 							_clients_write.push_back(*it);
 							it = _clients_read.erase(it);

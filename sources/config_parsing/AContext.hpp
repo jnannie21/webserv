@@ -14,7 +14,7 @@
 
 class AContext {
 public:
-    AContext() : _client_max_body_size(1024*1024),
+    AContext() : _client_max_body_size(0),
                 _is_client_max_body_size_already_set(false),
                 _autoindex(false),
                  _is_autoindex_already_set(false),

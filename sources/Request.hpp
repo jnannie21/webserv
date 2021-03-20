@@ -20,43 +20,45 @@ class Request {
 	friend class WebServ;
 
 public:
-	static std::set<std::string>    initRequestHeaders();
-//	static std::list<int>           initOkStatusCodes(void);
+	static std::set<std::string> initRequestHeaders();
+//	static std::list<int> initOkStatusCodes(void);
 
-	static const std::set<std::string>  implemented_headers;
-//	static const std::list<int>         OK_STATUS_CODES;
+	static const std::set<std::string> implemented_headers;
+//	static const std::list<int> OK_STATUS_CODES;
 
 private:
-	int                             _status_code;
+	int _status_code;
 	std::map<std::string, std::string>  _headers;
-	std::string                         _raw_request;
-	struct sockaddr_in                  _remote_addr;
-	std::string                         _method;
-	std::string                         _request_target;
-	std::string                         _query_string;
-	std::string                         _http_version;
-	std::string                         _content;
-	int                                 _server_port;
-	bool                                _close_connection;
-	ServerContext*                      _handling_server;
-	LocationContext*                    _handling_location;
-	std::string                         _absolute_root_path_for_request;
-	bool                                _is_alias_path;
-//	std::size_t                         _bytes_read;
-	std::size_t                         _body_bytes_read;
-	std::string                         _put_filename;
+	std::string _raw_request;
+	struct sockaddr_in _remote_addr;
+	std::string _method;
+	std::string _request_target;
+	std::string _query_string;
+	std::string _http_version;
+	std::string _content;
+	int _server_port;
+	bool _close_connection;
+	ServerContext* _handling_server;
+	LocationContext* _handling_location;
+	std::string _absolute_root_path_for_request;
+	bool _is_alias_path;
+//	std::size_t _bytes_read;
+	std::size_t _body_bytes_read;
+	std::string _put_filename;
 
-	bool                _header_has_been_read;
-	bool                _file_exists;
-//	long long           _only_content_length_read_body_size;
-	bool                _is_need_writing_body_to_file;
-	std::string         _cgi_script_path;
-	std::string         _response_content_lang;
+	bool _header_has_been_read;
+	bool _file_exists;
+//	long long _only_content_length_read_body_size;
+	bool _is_need_writing_body_to_file;
+	std::string _cgi_script_path;
+	std::string _response_content_lang;
 
-	bool            _is_chunked;
-	std::string     _host;
-	int             _port;
-	std::size_t     _lang_file_pos;
+	bool _is_chunked;
+	std::string _host;
+	int _port;
+	std::size_t _lang_file_pos;
+
+//	std::size_t _sum_content_length;
 
 public:
 	Request();
@@ -105,7 +107,7 @@ public:
 //	bool isConcreteHeaderExists(const std::string& header_name);
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);
-	bool isMethodLimited(const LocationContext& handling_location);
+	bool isMethodAllowed(const LocationContext& handling_location);
 	std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(std::string value);
 };
 

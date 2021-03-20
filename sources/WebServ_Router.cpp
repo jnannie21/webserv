@@ -247,7 +247,7 @@ LocationContext* WebServ::searchForBestMatchLocation(ServerContext* handling_ser
             std::string end_of_request_target = request_target.substr(start_pos);
 
             if (end_of_request_target == tmp_loc_ext) {
-                bool not_allowed = current_request->isMethodLimited(*(*it_extension));
+                bool not_allowed = current_request->isMethodAllowed(*(*it_extension));
 
                 // no limits
                 if (!not_allowed) {
