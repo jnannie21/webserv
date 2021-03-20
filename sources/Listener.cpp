@@ -106,9 +106,7 @@ void Listener::_closeSocket(std::list<int>::iterator & it) {
 }
 
 bool Listener::_checkIfHeadersHasBeenRead(Request* request) {
-    const std::string& raw_request = request->getRawRequest();
-
-    std::size_t headers_end = raw_request.find("\r\n\r\n");
+    std::size_t headers_end = request->_raw_request.find("\r\n\r\n");
     if (std::string::npos != headers_end) {
         return true;
     }
@@ -117,13 +115,12 @@ bool Listener::_checkIfHeadersHasBeenRead(Request* request) {
 
 bool Listener::_continueReadBody(Request* request) {
     const std::map<std::string, std::string>& headers = request->_headers;
-    std::string& body = request->getRawRequest();
 
     std::map<std::string, std::string>::const_iterator it = headers.find("transfer-encoding");
     if ((it != headers.end()) && ((*it).second.find("chunked") != std::string::npos)) {
 		request->_is_chunked = true;
 
-		size_t start_line_length = body.find("\r\n");
+		size_t start_line_length = request->_raw_request.find("\r\n");
 		if (start_line_length == std::string::npos)
 			return false;
 
@@ -131,16 +128,16 @@ bool Listener::_continueReadBody(Request* request) {
 		std::string chunk_length_field;
 		size_t chunk_length;
 
-        while (!body.empty()) { // jnannie: remade like Request::parseChunkedContent()
+        while (!request->_raw_request.empty()) { // jnannie: remade like Request::parseChunkedContent()
 
 			if (start_line_length == std::string::npos)
 				return false;
 			if (start_line_length > MAX_HEADER_LINE_LENGTH) {
 				request->setStatusCode(400);
 			}
-			start_line = body.substr(0, start_line_length);
+			start_line = request->_raw_request.substr(0, start_line_length);
 
-			chunk_length_field = start_line.substr(0, body.find(';')); // to ';' or full line
+			chunk_length_field = start_line.substr(0, request->_raw_request.find(';')); // to ';' or full line
 
 			libft::string_to_lower(chunk_length_field);
 			if (chunk_length_field.find_first_not_of("0123456789abcdef") != std::string::npos) {
@@ -150,20 +147,20 @@ bool Listener::_continueReadBody(Request* request) {
 			if (chunk_length == ULONG_MAX || chunk_length > ULONG_MAX - request->_body_bytes_read) {
 				request->setStatusCode(413);// 413 (Request Entity Too Large)
 			}
-			if (body.size() < start_line_length + 2 + chunk_length + 2)
+			if (request->_raw_request.size() < start_line_length + 2 + chunk_length + 2)
 				return false;
 
 			request->_body_bytes_read += chunk_length;
 
-			body.erase(0, start_line_length + 2); // remove start line
+			request->_raw_request.erase(0, start_line_length + 2); // remove start line
 			request->_content.append(request->_raw_request.substr(0, chunk_length));
-			body.erase(0, chunk_length + 2); // remove rest of chunk
+			request->_raw_request.erase(0, chunk_length + 2); // remove rest of chunk
 			if (chunk_length == 0) {
 				request->checkForMaxBodySize(request->_body_bytes_read);
 				return true;
 			}
 
-			start_line_length = body.find("\r\n");
+			start_line_length = request->_raw_request.find("\r\n");
         }
         return false;
     }
@@ -174,8 +171,8 @@ bool Listener::_continueReadBody(Request* request) {
         request->checkForMaxBodySize(content_length);
 
 		if (request->_raw_request.size() >= content_length) {
-			request->_content.append(body, 0, content_length);
-			body.clear();
+			request->_content.append(request->_raw_request, 0, content_length);
+			request->_raw_request.clear();
 			return true;
         }
         return false;
@@ -223,7 +220,7 @@ void Listener::_processHeaders(int client_socket) {
 
     request->parseRequestLine();
     request->parseHeaders();
-    request->parsUri();
+    request->parseUri();
 
     WebServ::routeRequest(_host, _port, request, request->_request_target);
 
@@ -262,7 +259,7 @@ bool Listener::_readBody(Request * request, int socket) {
 			request->setStatusCode(400);
 		}
 
-		request->_put_filename = request->getAbsolutePathForPutRequests() + request->_request_target;
+		request->_put_filename = request->_getAbsolutePathForPutRequests() + request->_request_target;
 
 		struct stat buffer;
 //		if (request->_put_file_exists)
@@ -302,7 +299,7 @@ void Listener::_handleRequests(fd_set* globalReadSetPtr) {
                     } else
 						_last_time[*it] = _get_time();
 
-					request->getRawRequest().append(_buf, bytes_read);
+					request->_raw_request.append(_buf, bytes_read);
 
 					if (!request->_header_has_been_read) {
                         request->_header_has_been_read = _checkIfHeadersHasBeenRead(request);

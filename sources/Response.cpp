@@ -355,7 +355,7 @@ std::string Response::_getExt(std::string filename) {
 }
 
 bool Response::_isCgiExt() {
-	if (_request->getCgiScriptPathForRequest().empty())
+	if (_request->getCgiScriptPath().empty())
 		return false;
 	return true;
 }
@@ -433,7 +433,7 @@ void Response::_runCgi(std::string & filename) { // filename is a *.php script
 	int pid;
     	int exit_status = 0;
 	std::string cgi_script;
-	cgi_script = _request->getCgiScriptPathForRequest();
+	cgi_script = _request->getCgiScriptPath();
 	char * argv[3] = {
 			const_cast<char *>(cgi_script.c_str()),
 			const_cast<char *>(filename.c_str()),
@@ -571,7 +571,7 @@ void Response::_parseHeadersFromCgiResponse() { // the same as in request header
 }
 
 void Response::_generateContentForGetRequest() {
-    if (!_isMethodAllowed() && (_request->getCgiScriptPathForRequest()).empty()) {
+    if (!_isMethodAllowed() && (_request->getCgiScriptPath()).empty()) {
         _allow = _getAllowHeader();
         _request->setStatusCode(405);
     }
@@ -672,7 +672,7 @@ void Response::_generatePutResponse() {
 
 void Response::_generatePostResponse() {
 
-	if (!_isMethodAllowed() && (_request->getCgiScriptPathForRequest()).empty()) {
+	if (!_isMethodAllowed() && (_request->getCgiScriptPath()).empty()) {
 		_allow = _getAllowHeader();
 		_request->setStatusCode(405);
 	}

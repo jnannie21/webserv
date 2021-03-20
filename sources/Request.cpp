@@ -107,7 +107,7 @@ void Request::setAbsoluteRootPathForRequest(void) {
     }
 }
 
-std::string Request::getAbsolutePathForPutRequests(void) const {
+std::string Request::_getAbsolutePathForPutRequests(void) const {
     std::string globalRootPath = WebServ::getWebServRootPath();
     std::string cont_root_path;
 
@@ -224,7 +224,7 @@ void Request::parseHeaders() {
 		setStatusCode(400);
 }
 
-void Request::parsUri() {
+void Request::parseUri() {
 	std::string url = _request_target;
 	std::string res;
 	std::string tmp;
@@ -288,7 +288,7 @@ void Request::parsUri() {
 	}
 }
 
-std::list<std::string> Request::parseAndSortAcceptPrefixHeadersByQuality(std::string value) {
+std::list<std::string> Request::_parseAndSortAcceptByQuality(std::string value) {
 
     std::list<Pair<std::string, float> > with_quality;
     std::size_t pos;
@@ -361,7 +361,7 @@ void Request::handleExpectHeader(void) {
  */
 
 void Request::handleAcceptCharsetHeader(void) {
-    std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
+    std::list<std::string> values = _parseAndSortAcceptByQuality("accept-language");
 
     bool is_found = (std::find(values.begin(), values.end(), DEFAULT_RESPONSE_CHARSET) != values.end());
     if (!is_found) {
@@ -376,7 +376,7 @@ void Request::handleAcceptLanguageHeader() {
     if (_lang_file_pos) {
         if (_headers.count("accept-language"))
         {
-            std::list<std::string> values = parseAndSortAcceptPrefixHeadersByQuality("accept-language");
+            std::list<std::string> values = _parseAndSortAcceptByQuality("accept-language");
             std::list<std::string>::const_iterator it = values.begin();
 
             bool is_found = false;
@@ -386,7 +386,7 @@ void Request::handleAcceptLanguageHeader() {
 
                 std::string full_filename = getAbsoluteRootPathForRequest();
 				appendRequestTarget(full_filename, target);
-                if (isRegFileExists(full_filename)) {
+                if (_isRegFileExists(full_filename)) {
                     _request_target = target;
                     is_found = true;
                     setReponseContentLang(*it);
@@ -446,11 +446,11 @@ void Request::setCgiScriptPathForRequest(const std::string& path) { _cgi_script_
 void Request::setHostAndPort(const std::string& host, const int port) { _host = host;  _port = port;}
 void Request::setReponseContentLang(const std::string& lang) { _response_content_lang = lang;}
 
-std::string &           Request::getRawRequest(void) { return this->_raw_request;}
+//std::string &           Request::getRawRequest(void) { return this->_raw_request;}
 const std::string&      Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
 int                     Request::getStatusCode() { return _status_code;}
-const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
-const std::string&      Request::getCgiScriptPathForRequest(void) const { return _cgi_script_path;}
+//const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
+const std::string&      Request::getCgiScriptPath(void) const { return _cgi_script_path; }
 
 bool Request::isStatusCodeOk() { return _status_code == 200 || _status_code == 201 || _status_code == 204; }
 
@@ -480,7 +480,7 @@ void Request::writeBodyInFile() {
 	close(file);
 }
 
-bool Request::isRegFileExists(const std::string& full_filename) {
+bool Request::_isRegFileExists(const std::string& full_filename) {
 	struct stat buffer;
 	return ((stat (full_filename.c_str(), &buffer) == 0) && S_ISREG(buffer.st_mode));
 }

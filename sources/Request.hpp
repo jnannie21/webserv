@@ -22,7 +22,7 @@ public:
 
 private:
 	int _status_code;
-	std::map<std::string, std::string>  _headers;
+	std::map<std::string, std::string> _headers;
 	std::string _raw_request;
 	struct sockaddr_in _remote_addr;
 	std::string _method;
@@ -63,16 +63,12 @@ public:
 	void setHostAndPort(const std::string& host, const int port);
 	void setReponseContentLang(const std::string& lang);
 
-	std::string & getRawRequest(void);
-	std::string getAbsolutePathForPutRequests(void) const;
 	const std::string& getAbsoluteRootPathForRequest(void) const;
 	int getStatusCode();
-	bool getNeedWritingBodyToFile(void) const;
-	const std::string& getReponseContentLang(void);
-	const std::string& getCgiScriptPathForRequest(void) const;
+	const std::string& getCgiScriptPath(void) const;
 
 	void parseRequestLine(void);
-	void parsUri();
+	void parseUri();
 	void parseHeaders(void);
 	void handleExpectHeader(void);
 	void handleAcceptCharsetHeader(void);
@@ -81,13 +77,14 @@ public:
 	bool isStatusCodeError();
 	void checkForMaxBodySize(long body_size);
 	void writeBodyInFile();
-	bool isRegFileExists(const std::string& full_filename);
 	bool targetIsFile(void);
 	void appendRequestTarget(std::string & filename, std::string &request_target);
 	bool isMethodAllowed(const LocationContext& handling_location);
-	std::list<std::string> parseAndSortAcceptPrefixHeadersByQuality(std::string value);
 
 private:
+	std::string _getAbsolutePathForPutRequests(void) const;
+	bool _isRegFileExists(const std::string& full_filename);
+	std::list<std::string> _parseAndSortAcceptByQuality(std::string value);
 	static bool _qualityPred(const Pair<std::string, float>& first, const Pair<std::string, float>& second);
 	std::list<std::string> _sortValuesByQuality(std::list<Pair<std::string, float> >& values_list);
 	Pair<int, float> _parseSpecificFloatValueForHeader(std::string str);

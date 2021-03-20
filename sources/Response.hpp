@@ -15,6 +15,32 @@ class Request;
 
 class Response {
 public:
+	static std::set<std::string> implemented_headers;
+	static std::map<int, std::string> status_codes;
+
+private:
+	Request * _request;
+	int _socket;
+	std::string _http_version;
+	std::map<std::string, std::string> _headers;
+	std::string _raw_response;
+// headers
+	std::string _content_type;
+	std::string _allow;
+	std::string _last_modified;
+	std::string _location;
+	std::string _content_location;
+	std::string _www_authenticate;
+	std::string _retry_after;
+	std::string _content;
+	std::string _file_ext;
+	std::string _cgi_response;
+	std::map<std::string, std::string> _cgi_headers;
+	bool _in_progress;
+	long _remains;
+	long _sent_len;
+
+public:
 	Response(Request * request, int socket);
 	Response();
 	~Response(void);
@@ -62,32 +88,6 @@ private:
 	std::string _replaceQuoteToCode(const std::string& str);
 	std::size_t _getCharsLen(const std::string& str);
 	static bool _isUtf_8(char c);
-
-public:
-	static std::set<std::string> implemented_headers;
-	static std::map<int, std::string> status_codes;
-
-private:
-	Request * _request;
-	int _socket;
-	std::string _http_version;
-	std::map<std::string, std::string> _headers;
-	std::string _raw_response;
-// headers
-	std::string _content_type;
-	std::string _allow;
-	std::string _last_modified;
-	std::string _location;
-	std::string _content_location;
-	std::string _www_authenticate;
-	std::string _retry_after;
-	std::string _content;
-	std::string _file_ext;
-	std::string _cgi_response;
-	std::map<std::string, std::string> _cgi_headers;
-	bool _in_progress;
-	long _remains;
-	long _sent_len;
 };
 
 

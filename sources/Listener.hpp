@@ -15,6 +15,21 @@ class Request;
 class Response;
 
 class Listener {
+private:
+	int _listener;
+	int _max_fd;
+
+	struct sockaddr_in _addr;
+	const std::string _host;
+	const in_addr_t _host_addr;
+	const int _port;
+	struct sockaddr_in _remote_addr;
+	std::list<int> _clients_read; // second param for ready or not
+	std::list<int> _clients_write; // second param for ready or not
+	std::map<int, Request> _client_requests;
+	std::map<int, Response> _client_response;
+	std::map<int, long> _last_time;
+
 public:
 	Listener(const std::string& host, in_addr_t host_addr, int port);
 	~Listener(void);
@@ -38,21 +53,6 @@ private:
 	bool _readBody(Request * request, int socket);
 
 	std::vector<std::string> parser_log_pass(std::string file, Request* request);
-
-private:
-	int _listener;
-	int _max_fd;
-
-	struct sockaddr_in _addr;
-	const std::string _host;
-    const in_addr_t _host_addr;
-	const int _port;
-	struct sockaddr_in _remote_addr;
-	std::list<int> _clients_read; // second param for ready or not
-	std::list<int> _clients_write; // second param for ready or not
-	std::map<int, Request> _client_requests;
-	std::map<int, Response> _client_response;
-	std::map<int, long> _last_time;
 };
 
 
