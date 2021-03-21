@@ -1,4 +1,4 @@
-<h1 align="center">welcome to Webserv. command project for 21school</h1>
+<h1 align="center">Welcome to Webserv. Command project for 21school </h1>
 
 #### * Written on C++ 98
 <p>
