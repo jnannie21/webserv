@@ -11,22 +11,12 @@
 #define TIME_OUT 300000
 #define BUFFER_SIZE 1024
 
-Listener::~Listener(void) {
-    std::list<int>::iterator read = _clients_read.begin();
-    std::list<int>::iterator write = _clients_write.begin();
-    while (read != _clients_read.end()) {
-        close(*read);
-        ++read;
-    }
-    while (write != _clients_write.end()) {
-        close(*write);
-        ++write;
-    }
-}
-
 Listener::Listener(const std::string &host, in_addr_t host_addr, int port)
-		: _host(host), _host_addr(host_addr), _port(port)
-{
+		: _listener(0),
+		_max_fd(0),
+		_host(host),
+		_host_addr(host_addr),
+		_port(port) {
 	_listener = socket(AF_INET, SOCK_STREAM, 0);
 	if(_listener < 0)
 		utils::exitWithLog();
@@ -47,6 +37,19 @@ Listener::Listener(const std::string &host, in_addr_t host_addr, int port)
 
 	if (listen(_listener, SOMAXCONN) < 0)
 		utils::exitWithLog();
+}
+
+Listener::~Listener(void) {
+    std::list<int>::iterator read = _clients_read.begin();
+    std::list<int>::iterator write = _clients_write.begin();
+    while (read != _clients_read.end()) {
+        close(*read);
+        ++read;
+    }
+    while (write != _clients_write.end()) {
+        close(*write);
+        ++write;
+    }
 }
 
 int                     Listener::getListener(void) const { return _listener; }

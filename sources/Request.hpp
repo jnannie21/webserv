@@ -40,7 +40,6 @@ private:
 	std::string _put_filename;
 
 	bool _header_has_been_read;
-	bool _is_need_writing_body_to_file;
 	std::string _cgi_script_path;
 	std::string _response_content_lang;
 
@@ -57,28 +56,28 @@ public:
 	void setStatusCode(int status_code);
 	void setStatusCodeNoExept(int status_code);
 	void setHandlingServer(ServerContext* handling_server);
-	void setHandlingLocation(LocationContext* location_to_route);
-	void setAbsoluteRootPathForRequest(void);
+	void setHandlingLocation(LocationContext * location);
+	void setAbsoluteRootPathForRequest();
 	void setCgiScriptPathForRequest(const std::string& path);
-	void setHostAndPort(const std::string& host, const int port);
+	void setHostAndPort(const std::string& host, int port);
 	void setReponseContentLang(const std::string& lang);
 
-	const std::string& getAbsoluteRootPathForRequest(void) const;
-	int getStatusCode();
-	const std::string& getCgiScriptPath(void) const;
+	const std::string& getAbsoluteRootPathForRequest() const;
+	int getStatusCode() const;
+	const std::string& getCgiScriptPath() const;
 
-	void parseRequestLine(void);
+	void parseRequestLine();
 	void parseUri();
-	void parseHeaders(void);
-	void handleExpectHeader(void);
-	void handleAcceptCharsetHeader(void);
+	void parseHeaders();
+	void handleExpectHeader();
+	void handleAcceptCharsetHeader();
 	void handleAcceptLanguageHeader();
-	bool isStatusCodeOk();
-	bool isStatusCodeError();
+	bool isStatusCodeOk() const;
+	bool isStatusCodeError() const;
 	void checkForMaxBodySize(long body_size);
 	void writeBodyInFile();
-	bool targetIsFile(void);
-	void appendRequestTarget(std::string & filename, std::string &request_target);
+	bool targetIsFile();
+	void appendRequestTarget(std::string & filename, const std::string &request_target);
 	bool isMethodAllowed(const LocationContext& handling_location);
 
 private:

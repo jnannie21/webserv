@@ -78,14 +78,18 @@ std::map<int,std::string> Response::_initStatusCodes() {
 }
 
 Response::Response() :
-		_request(), _socket(),
-		_raw_response(""), _content(""),
-		_in_progress(false), _sent_len(0) { }
+		_request(NULL),
+		_socket(0),
+		_in_progress(false),
+		_remains(0),
+		_sent_len(0) { }
 
 Response::Response(Request * request, int socket) :
-				_request(request), _socket(socket),
-				_raw_response(""), _content(""),
-				_in_progress(false), _sent_len(0) { }
+				_request(request),
+				_socket(socket),
+				_in_progress(false),
+				_remains(0),
+				_sent_len(0) { }
 
 Response::~Response(void) { }
 
@@ -102,7 +106,7 @@ void Response::_generateStatusLine() {
  * https://stackoverflow.com/questions/7960318/math-to-convert-seconds-since-1970-into-date-and-vice-versa
  * explanations http://howardhinnant.github.io/date_algorithms.html
  */
-struct tm Response::_getCalendarTime(time_t tv_sec) { // TODO: maybe should make it simplier. !!! [Airat Comment] Dima, kak hochesh )
+struct tm Response::_getCalendarTime(time_t tv_sec) const { // TODO: maybe should make it simplier. !!! [Airat Comment] Dima, kak hochesh )
 	struct tm calendar_time;
 	int days = tv_sec / 86400;
 	days += 719468;
@@ -128,13 +132,13 @@ struct tm Response::_getCalendarTime(time_t tv_sec) { // TODO: maybe should make
 	return calendar_time;
 }
 
-struct tm Response::_gmtime(time_t tv_sec) {
+struct tm Response::_gmtime(time_t tv_sec) const {
 	struct tm calendar_time;
 	calendar_time = _getCalendarTime(tv_sec);
 	return calendar_time;
 }
 
-std::string Response::_getDateHeader() {
+std::string Response::_getDateHeader() const {
 	char s[30]; // Wed, 24 Feb 2021 12:10:04 GMT + '\0'
 	struct tm calendar_time;
 	struct timeval tv;
@@ -148,7 +152,7 @@ std::string Response::_getDateHeader() {
 	return date_header;
 }
 
-std::string Response::_getLastModifiedHeader(time_t tv_sec) {
+std::string Response::_getLastModifiedHeader(time_t tv_sec) const {
 	char s[30]; // Wed, 24 Feb 2021 12:10:04 GMT + '\0'
 	struct tm calendar_time;
 
@@ -160,7 +164,7 @@ std::string Response::_getLastModifiedHeader(time_t tv_sec) {
 	return date_header;
 }
 
-std::string Response::_getLocationHeader(bool is_file) {
+std::string Response::_getLocationHeader(bool is_file) const {
 	std::string location;
 
 	location += "location: ";
@@ -175,7 +179,7 @@ std::string Response::_getLocationHeader(bool is_file) {
 	return location;
 }
 
-std::string Response::_getAllowHeader() {
+std::string Response::_getAllowHeader() const {
 	std::list<std::string> allowed_methods = _request->_handling_location->getLimitExceptMethods();
 	std::string allow = "Allow: ";
 	for (std::list<std::string>::iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it) {
@@ -187,12 +191,12 @@ std::string Response::_getAllowHeader() {
 	return allow;
 }
 
-std::string Response::_getWwwAuthenticateHeader() {
+std::string Response::_getWwwAuthenticateHeader() const {
 	std::string www_authenticate = "WWW-Authenticate: Basic realm=\"restricted\", charset=\"UTF-8\"\r\n";
 	return www_authenticate;
 }
 
-std::string Response::_getRetryAfterHeader() {
+std::string Response::_getRetryAfterHeader() const {
     std::string retryAfter = ("Retry-After: " + std::string(RETRY_AFTER_SECOND_DELAY) + "\r\n");
     return retryAfter;
 }
@@ -220,7 +224,7 @@ void Response::_generateHeaders() {
 	_raw_response += "\r\n";
 }
 
-const std::string Response::_getErrorPagePath(void) const {
+std::string Response::_getErrorPagePath() const {
     AContext * context = (_request->_handling_location != NULL) ?
                          static_cast<AContext*>(_request->_handling_location) :
                          static_cast<AContext*> (_request->_handling_server);
@@ -257,7 +261,7 @@ const std::string Response::_getErrorPagePath(void) const {
     return "";
 }
 
-void Response::_readErrorPage(std::string & error_page) {
+void Response::_readErrorPage(const std::string & error_page) {
 	int fd;
 	std::string content;
 	struct stat stat_buf;
@@ -315,7 +319,7 @@ void Response::_readFileToContent(std::string & filename) {
 	close(fd);
 }
 
-void Response::_setContentTypeByFileExt(std::string & ext) {
+void Response::_setContentTypeByFileExt(const std::string & ext) {
 	if (ext == "")
 		_content_type = "Content-Type: application/octet-stream\r\n";
 	else {
@@ -330,7 +334,7 @@ void Response::_setContentTypeByFileExt(std::string & ext) {
 	}
 }
 
-bool Response::_isMethodAllowed() {
+bool Response::_isMethodAllowed() const {
 	if (!_request->_handling_location)
 		return true;
 	std::list<std::string> allowed_methods = _request->_handling_location->getLimitExceptMethods();
@@ -344,7 +348,7 @@ bool Response::_isMethodAllowed() {
 	return false;
 }
 
-std::string Response::_getExt(std::string filename) {
+std::string Response::_getExt(const std::string& filename) const {
 	std::string ext;
 	size_t dot_pos;
 
@@ -354,7 +358,7 @@ std::string Response::_getExt(std::string filename) {
 	return ext;
 }
 
-bool Response::_isCgiExt() {
+bool Response::_isCgiExt() const {
 	if (_request->getCgiScriptPath().empty())
 		return false;
 	return true;
@@ -375,7 +379,7 @@ std::string Response::_inet_ntoa(struct in_addr sin_addr) {
 	return buf;
 }
 
-std::string Response::_getUserFromCredentials() {
+std::string Response::_getUserFromCredentials() const {
 	std::string user;
 	size_t credential_pos = _request->_headers["authorization"].find(" ");
 	credential_pos++;
@@ -387,7 +391,7 @@ std::string Response::_getUserFromCredentials() {
 	return user;
 }
 
-void Response::_setEnv(std::vector<char *> & env, std::string & filename, std::map<std::string, std::string> & cgiVariables) {
+void Response::_setEnv(std::vector<char *> & env, const std::string & filename, std::map<std::string, std::string> & cgiVariables) {
 	cgiVariables["AUTH_TYPE"] = "AUTH_TYPE=" + _request->_headers["authorization"].substr(0, _request->_headers["authorization"].find(' '));
 	cgiVariables["CONTENT_LENGTH"] = "CONTENT_LENGTH=" + _request->_headers["content-length"];
 	cgiVariables["CONTENT_TYPE"] = "CONTENT_TYPE=" + _request->_headers["content-type"];
@@ -429,7 +433,7 @@ void Response::_setEnv(std::vector<char *> & env, std::string & filename, std::m
 	env.push_back(NULL);
 }
 
-void Response::_runCgi(std::string & filename) { // filename is a *.php script
+void Response::_runCgi(const std::string & filename) { // filename is a *.php script
 	int pid;
     	int exit_status = 0;
 	std::string cgi_script;
@@ -700,7 +704,7 @@ void Response::generateResponse() {
 	if (_request->isStatusCodeOk()) {
 	    try
         {
-            _checkForAcceptPrefixHeaders();
+			_handleAcceptHeaders();
 
 			if (_request->_method == "GET") {
 				_generateGetResponse();
@@ -745,7 +749,7 @@ void Response::sendResponse() {
 		}
 }
 
-void Response::_checkForAcceptPrefixHeaders(void) {
+void Response::_handleAcceptHeaders(void) {
     if (_request->_headers.count("accept-charset")) {
         _request->handleAcceptCharsetHeader();
     }
@@ -757,7 +761,7 @@ void Response::setRemains() {
 	_remains = _raw_response.size();
 }
 
-bool Response::getInProgress() {
+bool Response::getInProgress() const {
 	return _in_progress;
 }
 
@@ -786,7 +790,7 @@ std::size_t Response::_getCharsLen(const std::string& str) {
 	return (str.length() - count_if(str.begin(), str.end(), _isUtf_8));
 }
 
-std::string Response::_generateAutoindex(std::string dir_name)
+std::string Response::_generateAutoindex(const std::string & dir_name)
 {
 	std::string host_n_port = "http://";
 	host_n_port += _request->_headers["host"];
