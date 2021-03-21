@@ -77,7 +77,7 @@ public:
 	void checkForMaxBodySize(long body_size);
 	void writeBodyInFile();
 	bool targetIsFile();
-	void appendRequestTarget(std::string & filename, std::string &request_target);
+	void appendRequestTarget(std::string & filename, const std::string &request_target);
 	bool isMethodAllowed(const LocationContext& handling_location);
 
 private:
