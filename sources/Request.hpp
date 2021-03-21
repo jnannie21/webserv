@@ -40,7 +40,6 @@ private:
 	std::string _put_filename;
 
 	bool _header_has_been_read;
-	bool _is_need_writing_body_to_file;
 	std::string _cgi_script_path;
 	std::string _response_content_lang;
 

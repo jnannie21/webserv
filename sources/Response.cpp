@@ -78,14 +78,18 @@ std::map<int,std::string> Response::_initStatusCodes() {
 }
 
 Response::Response() :
-		_request(), _socket(),
-		_raw_response(""), _content(""),
-		_in_progress(false), _sent_len(0) { }
+		_request(NULL),
+		_socket(0),
+		_in_progress(false),
+		_remains(0),
+		_sent_len(0) { }
 
 Response::Response(Request * request, int socket) :
-				_request(request), _socket(socket),
-				_raw_response(""), _content(""),
-				_in_progress(false), _sent_len(0) { }
+				_request(request),
+				_socket(socket),
+				_in_progress(false),
+				_remains(0),
+				_sent_len(0) { }
 
 Response::~Response(void) { }
 

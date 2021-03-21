@@ -31,9 +31,8 @@ std::set<std::string> Request::initRequestHeaders() {
 
 Request::Request()
 		: _status_code(200),
-		  _raw_request(""),
 		  _remote_addr(),
-		  _server_port(),
+		  _server_port(0),
 		  _close_connection(false),
 		  _handling_server(NULL),
 		  _handling_location(NULL),
@@ -42,11 +41,11 @@ Request::Request()
 		  _header_has_been_read(false),
 		  _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		  _is_chunked(false),
+		  _port(0),
 		  _lang_file_pos(0) {}
 
 Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		:  _status_code(200),
-		   _raw_request(""),
 		   _remote_addr(remote_addr),
 		   _server_port(server_port),
 		   _close_connection(false),
@@ -57,6 +56,7 @@ Request::Request(struct sockaddr_in & remote_addr, int server_port)
 		   _header_has_been_read(false),
 		   _response_content_lang(DEFAULT_RESPONSE_LANGUAGE),
 		   _is_chunked(false),
+		   _port(0),
 		   _lang_file_pos(0) {}
 
 Request::~Request() {}
