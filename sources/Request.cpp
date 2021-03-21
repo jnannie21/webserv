@@ -441,20 +441,18 @@ void Request::appendRequestTarget(std::string & filename, std::string &request_t
 
 void Request::setStatusCodeNoExept(int status_code) { _status_code = status_code;}
 void Request::setHandlingServer(ServerContext* handling_server) { _handling_server = handling_server;}
-void Request::setHandlingLocation(LocationContext* location_to_route) { _handling_location = location_to_route;}
+void Request::setHandlingLocation(LocationContext * location) { _handling_location = location;}
 void Request::setCgiScriptPathForRequest(const std::string& path) { _cgi_script_path = path;}
 void Request::setHostAndPort(const std::string& host, const int port) { _host = host;  _port = port;}
 void Request::setReponseContentLang(const std::string& lang) { _response_content_lang = lang;}
 
-//std::string &           Request::getRawRequest(void) { return this->_raw_request;}
-const std::string&      Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
-int                     Request::getStatusCode() { return _status_code;}
-//const std::string&      Request::getReponseContentLang(void) { return _response_content_lang; }
-const std::string&      Request::getCgiScriptPath(void) const { return _cgi_script_path; }
+const std::string& Request::getAbsoluteRootPathForRequest(void) const { return _absolute_root_path_for_request;}
+int Request::getStatusCode() const { return _status_code;}
+const std::string& Request::getCgiScriptPath(void) const { return _cgi_script_path; }
 
-bool Request::isStatusCodeOk() { return _status_code == 200 || _status_code == 201 || _status_code == 204; }
+bool Request::isStatusCodeOk() const { return _status_code == 200 || _status_code == 201 || _status_code == 204; }
 
-bool Request::isStatusCodeError() { return _status_code >= 400; }
+bool Request::isStatusCodeError() const { return _status_code >= 400; }
 
 void Request::checkForMaxBodySize(long body_size) {
 	long client_max_body_size;
