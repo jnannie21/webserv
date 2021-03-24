@@ -29,6 +29,10 @@ private:
     static std::list<std::string> _lang_code_list;
 
 public:
+    class NotOKStatusCodeException: public std::exception { };
+
+    class FatalErrorException: public std::exception { };
+
 	static void start();
 	static void stop();
 
@@ -54,10 +58,6 @@ public:
                                                          Request* _client_request,
                                                          const std::string& request_target);
     static bool             isAlreadyListeningHostPlusPort(const std::string& host_str, int port);
-
-    class NotOKStatusCodeException: public std::exception {
-        virtual const char* what() const throw() {return "";}
-    };
 
 	static LocationContext* searchForBestMatchLocation(ServerContext* handling_server,
 														 Request* current_request,

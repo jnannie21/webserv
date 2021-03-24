@@ -1,5 +1,6 @@
 #include "utils.hpp"
 #include <iostream>
+#include "WebServ.hpp"
 
 bool utils::isHttpMethod(const std::string& value) {
     std::string HTTP_METHODS[8] = {"GET",
@@ -22,7 +23,7 @@ bool utils::isHttpMethod(const std::string& value) {
 
 void utils::exitWithLog(void) {
     std::cout << std::strerror(errno) << std::endl;
-    exit(errno);
+    throw WebServ::FatalErrorException();
 }
 
 void utils::exitWithLog(const std::string& errorLog) {

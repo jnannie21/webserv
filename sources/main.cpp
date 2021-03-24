@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		WebServ::start();
 		WebServ::stop();
     }
-    catch (Config::BadConfigException & e)
-    {}
+    catch (Config::BadConfigException & e) {}
+    catch (WebServ::FatalErrorException & e) {}
     return 0;
 }
